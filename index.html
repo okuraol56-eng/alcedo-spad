@@ -66,7 +66,7 @@
   .f select { cursor: pointer; }
   .f textarea { resize: vertical; min-height: 60px; }
 
-  /* GPS / WEATHER */
+  /* INFO BARS */
   .info-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 500; }
   .info-bar.wait   { background: var(--amber-bg); color: var(--amber); }
   .info-bar.ok     { background: var(--teal-bg);  color: var(--teal); }
@@ -86,11 +86,10 @@
 
   .divider { height: 1px; background: var(--border); margin: 4px 0 14px; }
 
-  /* CONFIRMATION MODAL */
+  /* ═══ CONFIRM MODAL ═══ */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-    z-index: 200; display: none; align-items: flex-end;
-    justify-content: center; padding: 0;
+    z-index: 200; display: none; align-items: flex-end; justify-content: center;
   }
   .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -108,59 +107,107 @@
   .modal-atleaf { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; color: var(--teal); }
   .modal-atleaf.low { color: var(--amber); }
   .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-  .btn-cancel { padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--gray); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-cancel  { padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--gray); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .btn-confirm { padding: 14px; border: none; border-radius: 10px; background: var(--green); color: var(--white); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-  /* AI RESULT */
-  .ai-result { background: var(--white); border: 1.5px solid var(--purple); border-radius: 12px; padding: 16px; margin-bottom: 16px; display: none; }
-  .ai-result.show { display: block; }
-  .ai-result-header { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--purple); letter-spacing: 0.06em; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--purple-light); }
-
-  /* Conclusion box */
-  .ai-conclusion {
-    background: var(--must-bg); border: 1.5px solid var(--moss);
-    border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;
+  /* ═══ DETAIL MODAL ═══ */
+  .detail-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    z-index: 300; display: none; align-items: flex-end; justify-content: center;
   }
+  .detail-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+  .detail-sheet {
+    background: var(--cream); border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 600px; max-height: 90vh;
+    display: flex; flex-direction: column;
+    animation: slideUp2 0.3s ease;
+  }
+  .detail-handle {
+    display: flex; justify-content: center; padding: 12px 0 0;
+    flex-shrink: 0;
+  }
+  .detail-handle-bar {
+    width: 36px; height: 4px; border-radius: 2px; background: var(--border);
+  }
+  .detail-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 14px 20px 10px; flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-farmer { font-size: 18px; font-weight: 600; color: var(--forest); }
+  .detail-meta   { font-size: 11px; color: var(--gray); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .detail-atleaf-badge {
+    font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700;
+    color: var(--teal); text-align: right; flex-shrink: 0; margin-left: 12px;
+  }
+  .detail-atleaf-badge.low { color: var(--amber); }
+  .detail-atleaf-sub { font-size: 10px; color: var(--gray); text-align: right; }
+
+  .detail-body { overflow-y: auto; padding: 16px 20px 32px; flex: 1; }
+
+  /* Detail info grid */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .detail-cell { background: var(--white); border-radius: 8px; padding: 8px 10px; border: 1px solid var(--border); }
+  .detail-cell-label { font-size: 10px; color: var(--gray); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .detail-cell-val   { font-size: 13px; color: var(--text); font-weight: 500; }
+
+  /* AI section in detail */
+  .detail-ai-box { background: var(--white); border: 1.5px solid var(--purple); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .detail-ai-header { font-size: 11px; font-weight: 700; color: var(--purple); letter-spacing: 0.07em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .detail-no-ai { background: var(--gray-light); border-radius: 10px; padding: 16px; text-align: center; font-size: 13px; color: var(--gray); }
+
+  .ai-conclusion { background: var(--must-bg); border: 1.5px solid var(--moss); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+  .ai-conclusion.warn { background: var(--amber-bg); border-color: var(--amber); }
   .ai-conclusion-label { font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: 0.08em; margin-bottom: 4px; }
-  .ai-conclusion-text  { font-size: 13px; font-weight: 600; color: var(--forest); line-height: 1.5; }
-  .ai-conclusion.warn  { background: var(--amber-bg); border-color: var(--amber); }
   .ai-conclusion.warn .ai-conclusion-label { color: var(--amber); }
-  .ai-conclusion.warn .ai-conclusion-text  { color: #7C4A00; }
+  .ai-conclusion-text  { font-size: 13px; font-weight: 600; color: var(--forest); line-height: 1.5; }
+  .ai-conclusion.warn .ai-conclusion-text { color: #7C4A00; }
 
-  /* Action box */
-  .ai-action {
-    background: var(--teal-bg); border: 1.5px solid var(--teal);
-    border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;
-  }
+  .ai-action { background: var(--teal-bg); border: 1.5px solid var(--teal); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
   .ai-action-label { font-size: 10px; font-weight: 700; color: var(--teal); letter-spacing: 0.08em; margin-bottom: 6px; }
   .ai-action-item  { font-size: 12px; color: var(--teal); line-height: 1.7; display: flex; gap: 6px; }
   .ai-action-item::before { content: "→"; font-weight: 700; flex-shrink: 0; }
 
-  /* Detail sections */
   .ai-detail { margin-bottom: 10px; }
   .ai-detail-label { font-size: 10px; font-weight: 700; color: var(--gray); letter-spacing: 0.07em; margin-bottom: 4px; }
   .ai-detail-text  { font-size: 12px; color: var(--text); line-height: 1.6; }
 
-  /* Confidence */
-  .confidence-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
-  .conf-high   { background: var(--teal-bg);   color: var(--teal); }
-  .conf-medium { background: var(--amber-bg);  color: var(--amber); }
-  .conf-low    { background: var(--red-bg);    color: var(--red); }
+  .confidence-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 6px; }
+  .conf-high   { background: var(--teal-bg);  color: var(--teal); }
+  .conf-medium { background: var(--amber-bg); color: var(--amber); }
+  .conf-low    { background: var(--red-bg);   color: var(--red); }
 
+  .refs-box { background: var(--gray-light); border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
+  .refs-label { font-size: 10px; font-weight: 700; color: var(--gray); letter-spacing: 0.07em; margin-bottom: 8px; }
+  .ref-item   { font-size: 11px; color: var(--gray); line-height: 1.6; margin-bottom: 4px; display: flex; gap: 6px; align-items: baseline; }
+  .ref-item a { color: var(--purple); text-decoration: none; font-weight: 500; flex-shrink: 0; }
+  .ref-item a:hover { text-decoration: underline; }
+
+  /* visual obs in detail */
+  .detail-visual { background: var(--white); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .detail-visual-label { font-size: 10px; font-weight: 700; color: var(--gray); letter-spacing: 0.05em; margin-bottom: 4px; }
+  .detail-visual-text  { font-size: 12px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+
+  /* close button */
+  .btn-close-detail {
+    margin: 0 20px 0; padding: 14px;
+    background: var(--forest); color: var(--white);
+    border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  /* AI RESULT in entry */
+  .ai-result { background: var(--white); border: 1.5px solid var(--purple); border-radius: 12px; padding: 16px; margin-bottom: 16px; display: none; }
+  .ai-result.show { display: block; }
+  .ai-result-header { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--purple); letter-spacing: 0.06em; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--purple-light); }
   .ai-timestamp { font-size: 10px; color: var(--gray); margin-left: auto; font-weight: 400; }
-
   .ai-thinking { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--purple); padding: 12px 0; }
   .spinner { width: 18px; height: 18px; border: 2px solid var(--purple-light); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* REFERENCES */
-  .refs-box { background: var(--gray-light); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
-  .refs-label { font-size: 10px; font-weight: 700; color: var(--gray); letter-spacing: 0.07em; margin-bottom: 8px; }
-  .ref-item { font-size: 11px; color: var(--gray); line-height: 1.6; margin-bottom: 4px; display: flex; gap: 6px; align-items: baseline; }
-  .ref-item a { color: var(--purple); text-decoration: none; font-weight: 500; flex-shrink: 0; }
-  .ref-item a:hover { text-decoration: underline; }
-
-  /* API WARN */
   .api-warn { background: var(--amber-bg); border: 1px solid #F6AD55; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--amber); margin-bottom: 12px; display: none; }
   .api-warn.show { display: block; }
 
@@ -183,22 +230,26 @@
   .stat-n { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; color: var(--forest); }
   .stat-n.a { color: var(--amber); }
   .stat-l { font-size: 10px; color: var(--gray); margin-top: 2px; letter-spacing: 0.04em; }
-  .card  { background: var(--white); border-radius: 10px; border: 1.5px solid var(--border); padding: 12px 14px; margin-bottom: 10px; }
-  .card.flag { border-color: var(--amber); background: var(--amber-bg); }
-  .card-top  { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 7px; }
-  .card-name { font-weight: 600; font-size: 14px; color: var(--forest); }
-  .card-meta { font-size: 11px; color: var(--gray); font-family: 'DM Mono', monospace; }
-  .chips     { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
-  .chip      { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--gray-light); color: var(--gray); font-weight: 500; }
-  .chip.ai   { background: var(--purple-bg); color: var(--purple); }
-  .card-bot  { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
-  .spad-big  { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--teal); }
-  .spad-big.low { color: var(--amber); }
-  .spad-lbl2 { font-size: 10px; color: var(--gray); }
-  .flag-pill { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 700; }
-  .flag-pill.low { background: var(--amber); color: var(--white); }
-  .flag-pill.ok  { background: var(--teal);  color: var(--white); }
-  .ai-snippet { font-size: 11px; color: var(--purple); margin-top: 6px; font-style: italic; line-height: 1.5; border-top: 1px solid var(--purple-light); padding-top: 6px; }
+
+  .card  { background: var(--white); border-radius: 10px; border: 1.5px solid var(--border); padding: 12px 14px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+  .card:hover  { border-color: var(--green); box-shadow: 0 2px 8px rgba(44,95,45,0.1); }
+  .card.flag   { border-color: var(--amber); background: var(--amber-bg); }
+  .card.flag:hover { border-color: var(--amber); box-shadow: 0 2px 8px rgba(212,132,26,0.15); }
+  .card-top    { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 7px; }
+  .card-name   { font-weight: 600; font-size: 14px; color: var(--forest); }
+  .card-meta   { font-size: 11px; color: var(--gray); font-family: 'DM Mono', monospace; }
+  .chips       { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
+  .chip        { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--gray-light); color: var(--gray); font-weight: 500; }
+  .chip.ai     { background: var(--purple-bg); color: var(--purple); }
+  .card-bot    { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
+  .spad-big    { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--teal); }
+  .spad-big.low{ color: var(--amber); }
+  .spad-lbl2   { font-size: 10px; color: var(--gray); }
+  .flag-pill   { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 700; }
+  .flag-pill.low{ background: var(--amber); color: var(--white); }
+  .flag-pill.ok { background: var(--teal);  color: var(--white); }
+  .ai-snippet  { font-size: 11px; color: var(--purple); margin-top: 6px; font-style: italic; line-height: 1.5; border-top: 1px solid var(--purple-light); padding-top: 6px; }
+  .tap-hint    { font-size: 10px; color: var(--gray); margin-top: 6px; text-align: right; }
   .empty { text-align: center; padding: 60px 20px; color: var(--gray); font-size: 14px; }
 
   /* SETUP */
@@ -233,18 +284,40 @@
 </head>
 <body>
 
-<!-- CONFIRMATION MODAL -->
+<!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
     <div class="modal-title">Confirm before submitting</div>
     <div id="confirmRows"></div>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">← Edit</button>
+      <button class="btn-cancel" onclick="closeConfirm()">← Edit</button>
       <button class="btn-confirm" onclick="doSubmit()">Save Record ✓</button>
     </div>
   </div>
 </div>
 
+<!-- DETAIL MODAL -->
+<div class="detail-overlay" id="detailModal" onclick="closeDetailIfBg(event)">
+  <div class="detail-sheet" id="detailSheet">
+    <div class="detail-handle"><div class="detail-handle-bar"></div></div>
+    <div class="detail-header">
+      <div>
+        <div class="detail-farmer" id="d_farmer"></div>
+        <div class="detail-meta"   id="d_meta"></div>
+      </div>
+      <div>
+        <div class="detail-atleaf-badge" id="d_atleaf"></div>
+        <div class="detail-atleaf-sub">atLEAF avg</div>
+      </div>
+    </div>
+    <div class="detail-body" id="d_body"></div>
+    <div style="padding:12px 20px 36px;flex-shrink:0">
+      <button class="btn-close-detail" style="width:100%" onclick="closeDetail()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
 <div class="header">
   <div class="header-left">
     <div class="header-dot"></div>
@@ -277,59 +350,40 @@
     <span>🌧️</span><span id="weatherText">Rainfall loads after GPS...</span>
   </div>
 
-  <!-- VISIT INFO -->
   <div class="sec">VISIT INFO <span class="badge badge-m">MUST</span></div>
-  <div class="row">
-    <div class="f"><label>Farmer Name <span class="r">*</span></label>
-      <input type="text" id="f_farmer" class="m" placeholder="e.g. Ion Popescu"></div>
-  </div>
+  <div class="row"><div class="f"><label>Farmer Name <span class="r">*</span></label><input type="text" id="f_farmer" class="m" placeholder="e.g. Ion Popescu"></div></div>
   <div class="row c2">
     <div class="f"><label>Date <span class="r">*</span></label><input type="date" id="f_date" class="m"></div>
     <div class="f"><label>Time <span class="r">*</span></label><input type="time" id="f_time" class="m"></div>
   </div>
 
-  <!-- MEASUREMENT ID -->
   <div class="sec">MEASUREMENT ID <span class="badge badge-m">MUST</span></div>
   <div class="row c2">
-    <div class="f"><label>Device ID <span class="r">*</span></label>
-      <input type="text" id="f_device" class="m" placeholder="e.g. SPAD-03"></div>
-    <div class="f"><label>Measurement ID <span class="r">*</span></label>
-      <input type="text" id="f_meas_id" class="m" placeholder="e.g. 00142"></div>
+    <div class="f"><label>Device ID <span class="r">*</span></label><input type="text" id="f_device" class="m" placeholder="e.g. SPAD-03"></div>
+    <div class="f"><label>Measurement ID <span class="r">*</span></label><input type="text" id="f_meas_id" class="m" placeholder="e.g. 00142"></div>
   </div>
 
-  <!-- CROP & STAGE -->
   <div class="sec">CROP & STAGE <span class="badge badge-m">MUST</span></div>
   <div class="row c2">
     <div class="f"><label>Crop <span class="r">*</span></label>
       <select id="f_crop" class="m" onchange="updateStages()">
-        <option value="">Select...</option>
-        <option>Maize</option><option>Sunflower</option>
+        <option value="">Select...</option><option>Maize</option><option>Sunflower</option>
         <option>Wheat</option><option>Rapeseed</option><option>Other</option>
       </select></div>
     <div class="f"><label>Growth Stage <span class="r">*</span></label>
-      <select id="f_stage" class="m" onchange="checkVal()">
-        <option value="">Select crop first</option>
-      </select></div>
+      <select id="f_stage" class="m" onchange="checkVal()"><option value="">Select crop first</option></select></div>
   </div>
   <div class="row c2" style="margin-top:0">
-    <div class="f"><label>Variety / Hybrid <span class="r">*</span></label>
-      <input type="text" id="f_variety" class="m" placeholder="e.g. Pioneer P9903"></div>
-    <div class="f"><label>FAO Number</label>
-      <input type="number" id="f_fao" class="o" placeholder="e.g. 380" min="100" max="900"></div>
+    <div class="f"><label>Variety / Hybrid <span class="r">*</span></label><input type="text" id="f_variety" class="m" placeholder="e.g. Pioneer P9903"></div>
+    <div class="f"><label>FAO Number</label><input type="number" id="f_fao" class="o" placeholder="e.g. 380" min="100" max="900"></div>
   </div>
-  <div class="row">
-    <div class="f"><label>Leaf Position <span class="r">*</span></label>
-      <select id="f_leaf_pos" class="m">
-        <option value="">Select...</option>
-        <option>Uppermost fully collared leaf</option>
-        <option>5th leaf from base (V6 specific)</option>
-        <option>Ear leaf</option>
-        <option>Last fully expanded leaf (sunflower)</option>
-        <option>Other</option>
-      </select></div>
-  </div>
+  <div class="row"><div class="f"><label>Leaf Position <span class="r">*</span></label>
+    <select id="f_leaf_pos" class="m">
+      <option value="">Select...</option>
+      <option>Uppermost fully collared leaf</option><option>5th leaf from base (V6 specific)</option>
+      <option>Ear leaf</option><option>Last fully expanded leaf (sunflower)</option><option>Other</option>
+    </select></div></div>
 
-  <!-- atLEAF READING -->
   <div class="sec">atLEAF READING <span class="badge badge-m">MUST</span></div>
   <div style="font-size:11px;color:var(--teal);padding:6px 10px;background:var(--teal-bg);border-radius:6px;margin-bottom:10px;">
     Enter the 5-plant average shown in the atLEAF app.
@@ -341,18 +395,14 @@
   </div>
   <div class="spad-warn" id="spadWarn"></div>
 
-  <!-- N FERTILISER -->
   <div class="sec">N FERTILISER HISTORY <span class="badge badge-m">MUST</span></div>
   <div class="row c2">
-    <div class="f"><label>N Applied (kg N/ha) <span class="r">*</span></label>
-      <input type="number" id="f_n_rate" class="m" min="0" step="1" placeholder="120"></div>
-    <div class="f"><label>N Application Date</label>
-      <input type="date" id="f_n_date" class="m"></div>
+    <div class="f"><label>N Applied (kg N/ha) <span class="r">*</span></label><input type="number" id="f_n_rate" class="m" min="0" step="1" placeholder="120"></div>
+    <div class="f"><label>N Application Date</label><input type="date" id="f_n_date" class="m"></div>
   </div>
 
   <div class="divider"></div>
 
-  <!-- OPTIONAL -->
   <div class="sec opt">OPTIONAL <span class="badge badge-o">SKIP IF BUSY</span></div>
   <div class="row c2">
     <div class="f"><label>Soil Type</label>
@@ -366,28 +416,20 @@
         <option>Maize</option><option>Rapeseed</option><option>Soybean</option><option>Other</option>
       </select></div>
   </div>
-  <div class="row" style="margin-top:0">
-    <div class="f"><label>Visual Observations</label>
-      <textarea id="f_visual" class="o" placeholder="e.g. Uniform light green, slight yellowing on lower leaves..."></textarea>
-    </div>
-  </div>
+  <div class="row" style="margin-top:0"><div class="f"><label>Visual Observations</label>
+    <textarea id="f_visual" class="o" placeholder="e.g. Uniform light green, slight yellowing on lower leaves..."></textarea>
+  </div></div>
 
   <div class="divider"></div>
 
-  <!-- AI -->
   <div class="sec ai">AI INTERPRETATION <span class="badge badge-ai">CLAUDE</span></div>
   <div class="api-warn" id="apiWarn">⚠️ Claude API key not set. Go to Setup tab to add your key.</div>
-
   <div class="ai-result" id="aiResult">
-    <div class="ai-result-header">
-      ✦ AI INTERPRETATION
-      <span class="ai-timestamp" id="aiTimestamp"></span>
-    </div>
+    <div class="ai-result-header">✦ AI INTERPRETATION<span class="ai-timestamp" id="aiTimestamp"></span></div>
     <div id="aiResultContent"></div>
   </div>
 
 </div>
-
 <div class="submit-wrap">
   <button class="btn-ai" id="btnAI" onclick="getAI()">✦ Interpret with AI</button>
   <button class="btn-submit" id="btnSubmit" onclick="showConfirm()">Save Record</button>
@@ -409,7 +451,6 @@
 <!-- ═══════ SETUP ═══════ -->
 <div class="panel" id="panel-setup">
 <div class="set-wrap">
-
   <div class="set-card">
     <div class="set-title">Your Profile</div>
     <div class="step">
@@ -417,15 +458,11 @@
       <div class="step-c">
         <div class="step-h">Your name (sales rep)</div>
         <div class="step-d">Set once. Attached to every record automatically.</div>
-        <div class="inp-row">
-          <input type="text" class="url-inp" id="userName" placeholder="e.g. ION_POPESCU">
-          <button class="btn-save" onclick="saveName()">Save</button>
-        </div>
+        <div class="inp-row"><input type="text" class="url-inp" id="userName" placeholder="e.g. ION_POPESCU"><button class="btn-save" onclick="saveName()">Save</button></div>
         <div class="ok-badge" id="nameSaved">✅ Saved</div>
       </div>
     </div>
   </div>
-
   <div class="set-card" style="border-color:#C4B5FD">
     <div class="set-title" style="color:var(--purple)">✦ Claude API Key</div>
     <div class="step" style="margin-bottom:0">
@@ -433,30 +470,18 @@
       <div class="step-c">
         <div class="step-h">Paste your API key</div>
         <div class="step-d">Get from <code>console.anthropic.com</code> → API Keys. Stored only on this device.</div>
-        <div class="inp-row">
-          <input type="password" class="url-inp" id="apiKey" placeholder="sk-ant-api03-...">
-          <button class="btn-save" style="background:var(--purple)" onclick="saveApiKey()">Save</button>
-        </div>
+        <div class="inp-row"><input type="password" class="url-inp" id="apiKey" placeholder="sk-ant-api03-..."><button class="btn-save" style="background:var(--purple)" onclick="saveApiKey()">Save</button></div>
         <div class="ok-badge" id="apiKeySaved">✅ API key saved</div>
       </div>
     </div>
   </div>
-
   <div class="set-card">
     <div class="set-title">Connect to Google Sheets</div>
-    <div class="step">
-      <div class="step-n">1</div>
-      <div class="step-c">
-        <div class="step-h">Create a Google Sheet</div>
-        <div class="step-d"><code>sheets.google.com</code> → New → name it <code>SPAD Calibration DB</code></div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-n">2</div>
-      <div class="step-c">
-        <div class="step-h">Open Apps Script & paste code</div>
-        <div class="step-d"><code>Extensions → Apps Script</code> → delete all → paste → Save 💾</div>
-        <div class="script-box"><pre id="scriptCode">function doPost(e) {
+    <div class="step"><div class="step-n">1</div><div class="step-c"><div class="step-h">Create a Google Sheet</div><div class="step-d"><code>sheets.google.com</code> → New → name it <code>SPAD Calibration DB</code></div></div></div>
+    <div class="step"><div class="step-n">2</div><div class="step-c">
+      <div class="step-h">Open Apps Script & paste code</div>
+      <div class="step-d"><code>Extensions → Apps Script</code> → delete all → paste → Save 💾</div>
+      <div class="script-box"><pre id="scriptCode">function doPost(e) {
   try {
     var sheet = SpreadsheetApp
       .getActiveSpreadsheet().getActiveSheet();
@@ -493,44 +518,22 @@ function doGet(e) {
     .createTextOutput(JSON.stringify({status:"alive"}))
     .setMimeType(ContentService.MimeType.JSON);
 }</pre></div>
-        <button class="btn-copy" onclick="copyScript()">Copy script</button>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-n">3</div>
-      <div class="step-c">
-        <div class="step-h">Deploy as Web App</div>
-        <div class="step-d">
-          <code>Deploy → New deployment → Web app</code><br>
-          Execute as: <code>Me</code> · Who has access: <code>Anyone</code> → Deploy → copy URL
-        </div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-n">4</div>
-      <div class="step-c">
-        <div class="step-h">Paste Web App URL</div>
-        <div class="inp-row">
-          <input type="text" class="url-inp" id="gasUrl" placeholder="https://script.google.com/macros/s/...">
-          <button class="btn-save" onclick="saveUrl()">Save</button>
-        </div>
-        <div class="ok-badge" id="urlSaved">✅ Connected to Google Sheets</div>
-      </div>
-    </div>
+      <button class="btn-copy" onclick="copyScript()">Copy script</button>
+    </div></div>
+    <div class="step"><div class="step-n">3</div><div class="step-c"><div class="step-h">Deploy as Web App</div><div class="step-d"><code>Deploy → New deployment → Web app</code><br>Execute as: <code>Me</code> · Who has access: <code>Anyone</code> → Deploy → copy URL</div></div></div>
+    <div class="step"><div class="step-n">4</div><div class="step-c">
+      <div class="step-h">Paste Web App URL</div>
+      <div class="inp-row"><input type="text" class="url-inp" id="gasUrl" placeholder="https://script.google.com/macros/s/..."><button class="btn-save" onclick="saveUrl()">Save</button></div>
+      <div class="ok-badge" id="urlSaved">✅ Connected to Google Sheets</div>
+    </div></div>
   </div>
-
-  <div class="info-note">
-    <strong>GPS note:</strong> Requires HTTPS. Host this file on GitHub Pages or Google Sites for full GPS support.
-    Rainfall data from Open-Meteo (free, no registration needed).
-  </div>
-
+  <div class="info-note"><strong>GPS note:</strong> Requires HTTPS. Host on GitHub Pages or Google Sites for full GPS support. Rainfall from Open-Meteo (free, no registration).</div>
 </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are an expert agronomist advisor for Alcedo, a Romanian agricultural inputs distributor. Interpret atLEAF chlorophyll meter readings and provide concise, scientifically grounded diagnostic guidance to field sales representatives.
 
 SCIENTIFIC BASIS:
@@ -538,13 +541,13 @@ SCIENTIFIC BASIS:
 - atLEAF ~40 units ≈ SPAD 43.4 (Piekkielek & Fox 1992 V6 threshold for N response).
 - Leaf N(%) ≈ 0.073 × SPAD − 0.98, R²=0.80 at V6–V12 (Rhezali et al. 2021).
 - Sunflower: no validated absolute threshold; V12 most predictive (Tovar Hernandez et al. 2021).
-- SPAD saturates after R1 in maize — interpret late-stage low values as stress/senescence, not actionable N deficiency.
+- SPAD saturates after R1 in maize — interpret late-stage low values as stress/senescence.
 
-DIFFERENTIAL DIAGNOSIS — always consider before concluding N deficiency:
-1. WATER STRESS: Rainfall <20mm last 14 days blocks N uptake. Check wilting, soil moisture.
-2. SULFUR DEFICIENCY: Yellowing on new/young leaves (interveinal). Consider S correction.
+DIFFERENTIAL DIAGNOSIS:
+1. WATER STRESS: Rainfall <20mm last 14 days blocks N uptake.
+2. SULFUR DEFICIENCY: Yellowing on new/young leaves (interveinal).
 3. Mg DEFICIENCY: Interveinal chlorosis on older leaves.
-4. DISEASE: Irregular spotting/lesions. Not treatable with N.
+4. DISEASE: Irregular spotting/lesions.
 5. VARIETY BASELINE: Some hybrids naturally lighter green.
 
 RESPOND IN EXACTLY THIS JSON FORMAT — no markdown, no extra text:
@@ -560,19 +563,17 @@ RESPOND IN EXACTLY THIS JSON FORMAT — no markdown, no extra text:
 }
 Only include papers actually used in your reasoning. Keep actions specific and agronomically actionable. No product names.`;
 
-// ── REFERENCES ─────────────────────────────────────────────────────────────
 const PAPERS = {
-  "Piekkielek & Fox 1992": { cite: "Piekkielek & Fox (1992) — V6 threshold 43.4 SPAD, 67-experiment dataset", url: "https://www.researchgate.net/publication/240546191" },
-  "Schepers et al. 1992":  { cite: "Schepers et al. (1992) — NSI / reference strip normalization", url: "https://www.ars.usda.gov/ARSUserFiles/30100500/Publications%201999-1990/61%20Comparison%20of%20corn%20leaf%20nitrogen%20concentration%20and%20chlorophyll%20meter%20readings.pdf" },
-  "Rhezali et al. 2021":   { cite: "Rhezali et al. (2021) — Leaf N(%)≈0.073×SPAD−0.98, R²=0.80 at V6–V12", url: "https://www.mdpi.com/2673-4079/2/1/5" },
-  "Tovar Hernandez et al. 2021": { cite: "Tovar Hernandez et al. (2021) — Sunflower N diagnosis, V12 NDVIr threshold 0.95", url: "https://doi.org/10.1002/agj2.20685" },
-  "Xiong et al. 2015":     { cite: "Xiong et al. (2015) — SPAD-N affected by species, light, time of day", url: "https://www.nature.com/articles/srep13389" },
-  "Zhu et al. 2011":       { cite: "Zhu, Tremblay & Liang (2011) — atLEAF vs SPAD equivalent performance", url: "https://www.nrcresearchpress.com/doi/abs/10.4141/cjss2011-100" },
-  "Gallinat et al.":       { cite: "Gallinat, Garrison & Primack — atLEAF vs SPAD-502, R²=0.98", url: "https://www.atleaf.com/Download/PrimackLab.pdf" },
-  "Lundy et al. 2014":     { cite: "Lundy et al. (2014) — atLEAF in field N management, small grains", url: "https://www.atleaf.com/Download/lundy_13l14annual_report_9l30l14.pdf" },
+  "Piekkielek & Fox 1992":       { cite:"Piekkielek & Fox (1992) — V6 threshold 43.4 SPAD, 67-experiment dataset", url:"https://www.researchgate.net/publication/240546191" },
+  "Schepers et al. 1992":        { cite:"Schepers et al. (1992) — NSI / reference strip normalization", url:"https://www.ars.usda.gov/ARSUserFiles/30100500/Publications%201999-1990/61%20Comparison%20of%20corn%20leaf%20nitrogen%20concentration%20and%20chlorophyll%20meter%20readings.pdf" },
+  "Rhezali et al. 2021":         { cite:"Rhezali et al. (2021) — Leaf N(%)≈0.073×SPAD−0.98, R²=0.80 at V6–V12", url:"https://www.mdpi.com/2673-4079/2/1/5" },
+  "Tovar Hernandez et al. 2021": { cite:"Tovar Hernandez et al. (2021) — Sunflower N diagnosis, V12 NDVIr threshold 0.95", url:"https://doi.org/10.1002/agj2.20685" },
+  "Xiong et al. 2015":           { cite:"Xiong et al. (2015) — SPAD-N affected by species, light, time of day", url:"https://www.nature.com/articles/srep13389" },
+  "Zhu et al. 2011":             { cite:"Zhu, Tremblay & Liang (2011) — atLEAF vs SPAD equivalent performance", url:"https://www.nrcresearchpress.com/doi/abs/10.4141/cjss2011-100" },
+  "Gallinat et al.":             { cite:"Gallinat, Garrison & Primack — atLEAF vs SPAD-502, R²=0.98", url:"https://www.atleaf.com/Download/PrimackLab.pdf" },
+  "Lundy et al. 2014":           { cite:"Lundy et al. (2014) — atLEAF in field N management, small grains", url:"https://www.atleaf.com/Download/lundy_13l14annual_report_9l30l14.pdf" },
 };
 
-// ── STATE ──────────────────────────────────────────────────────────────────
 const STAGES = {
   'Maize':     ['V3','V4','V5','V6','V7','V8','V9','V10','V11','V12','VT','R1','R2','R3','R4'],
   'Sunflower': ['SF-V6','SF-V8','SF-V12','SF-Bud (star)','SF-Flowering','SF-Seed fill'],
@@ -581,280 +582,198 @@ const STAGES = {
   'Other':     ['Vegetative','Reproductive','Other'],
 };
 
-let records   = JSON.parse(localStorage.getItem('spad_v5') || '[]');
-let gasUrl    = localStorage.getItem('spad_gas_url') || '';
-let userName  = localStorage.getItem('spad_user')    || '';
-let apiKey    = localStorage.getItem('spad_api_key') || '';
+let records  = JSON.parse(localStorage.getItem('spad_v6') || '[]');
+let gasUrl   = localStorage.getItem('spad_gas_url') || '';
+let userName = localStorage.getItem('spad_user')    || '';
+let apiKey   = localStorage.getItem('spad_api_key') || '';
 let gpsLat = null, gpsLon = null, rainfallMm = null;
 let lastAIResult = '', lastAIParsed = null;
 
-// ── INIT ───────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   document.getElementById('f_date').value = now.toISOString().split('T')[0];
-  document.getElementById('f_time').value =
-    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  if (userName) { document.getElementById('userName').value = userName; document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=userName; }
-  if (gasUrl)   { document.getElementById('gasUrl').value = gasUrl; document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); }
-  if (apiKey)   { document.getElementById('apiKey').value = apiKey; document.getElementById('apiKeySaved').style.display='flex'; }
+  document.getElementById('f_time').value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  if (userName) { document.getElementById('userName').value=userName; document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=userName; }
+  if (gasUrl)   { document.getElementById('gasUrl').value=gasUrl; document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); }
+  if (apiKey)   { document.getElementById('apiKey').value=apiKey; document.getElementById('apiKeySaved').style.display='flex'; }
   else          { document.getElementById('apiWarn').classList.add('show'); }
   getGPS();
 });
 
-// ── GPS ────────────────────────────────────────────────────────────────────
+// ── GPS ───────────────────────────────────────────────────────────────────
 function getGPS() {
-  setBar('gpsBar','wait','📡','Acquiring GPS...');
-  setBar('weatherBar','neutral','🌧️','Rainfall loads after GPS...');
-  if (!navigator.geolocation) { setBar('gpsBar','fail','❌','GPS not supported'); return; }
+  setBar('gpsBar','wait','📡','Acquiring GPS...',true);
+  setBar('weatherBar','neutral','🌧️','Rainfall loads after GPS...',false);
+  if (!navigator.geolocation) { setBar('gpsBar','fail','❌','GPS not supported',true); return; }
   navigator.geolocation.getCurrentPosition(
-    p => {
-      gpsLat = p.coords.latitude.toFixed(5);
-      gpsLon = p.coords.longitude.toFixed(5);
-      setBar('gpsBar','ok','✅', gpsLat + ', ' + gpsLon);
-      fetchRainfall(gpsLat, gpsLon);
-    },
-    () => { gpsLat=null; gpsLon=null; setBar('gpsBar','fail','⚠️','GPS failed — needs HTTPS'); setBar('weatherBar','neutral','—','Rainfall unavailable'); },
+    p => { gpsLat=p.coords.latitude.toFixed(5); gpsLon=p.coords.longitude.toFixed(5); setBar('gpsBar','ok','✅',gpsLat+', '+gpsLon,true); fetchRainfall(gpsLat,gpsLon); },
+    () => { gpsLat=null; gpsLon=null; setBar('gpsBar','fail','⚠️','GPS failed — needs HTTPS',true); setBar('weatherBar','neutral','—','Rainfall unavailable',false); },
     { enableHighAccuracy:true, timeout:10000 }
   );
 }
 
-function setBar(id, state, icon, text) {
+function setBar(id, state, icon, text, hasRetry) {
   const el = document.getElementById(id);
-  el.className = (id==='gpsBar' ? 'info-bar ' : 'info-bar ') + state;
-  el.innerHTML = `<span>${icon}</span><span>${text}</span>${id==='gpsBar' ? '<button class="btn-sm" onclick="getGPS()">Retry</button>' : ''}`;
+  el.className = 'info-bar ' + state;
+  el.innerHTML = `<span>${icon}</span><span id="${id==='gpsBar'?'gpsText':'weatherText'}">${text}</span>${hasRetry?'<button class="btn-sm" onclick="getGPS()">Retry</button>':''}`;
 }
 
-// ── RAINFALL ───────────────────────────────────────────────────────────────
 async function fetchRainfall(lat, lon) {
-  setBar('weatherBar','wait','⏳','Fetching 14-day rainfall...');
+  setBar('weatherBar','wait','⏳','Fetching 14-day rainfall...',false);
   try {
-    const end = new Date(), start = new Date();
-    start.setDate(start.getDate()-14);
-    const fmt = d => d.toISOString().split('T')[0];
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum&start_date=${fmt(start)}&end_date=${fmt(end)}&timezone=auto`;
-    const data = await (await fetch(url)).json();
+    const end=new Date(), start=new Date(); start.setDate(start.getDate()-14);
+    const fmt=d=>d.toISOString().split('T')[0];
+    const data=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum&start_date=${fmt(start)}&end_date=${fmt(end)}&timezone=auto`)).json();
     if (data.daily?.precipitation_sum) {
       rainfallMm = data.daily.precipitation_sum.filter(v=>v!==null).reduce((a,b)=>a+b,0).toFixed(1);
-      const mm = parseFloat(rainfallMm);
-      const icon = mm < 20 ? '🔴' : mm > 60 ? '💧' : '✅';
-      const note = mm < 20 ? ' — LOW (water stress risk)' : mm > 60 ? ' — HIGH (N leaching risk)' : ' — normal';
-      setBar('weatherBar','ok', icon, `Rainfall last 14d: ${rainfallMm} mm${note}`);
+      const mm=parseFloat(rainfallMm);
+      setBar('weatherBar','ok', mm<20?'🔴':mm>60?'💧':'✅', `Rainfall last 14d: ${rainfallMm} mm${mm<20?' — LOW (water stress risk)':mm>60?' — HIGH (N leaching risk)':' — normal'}`, false);
     } else throw new Error();
-  } catch { rainfallMm=null; setBar('weatherBar','neutral','⚠️','Rainfall data unavailable'); }
+  } catch { rainfallMm=null; setBar('weatherBar','neutral','⚠️','Rainfall data unavailable',false); }
 }
 
-// ── STAGES ─────────────────────────────────────────────────────────────────
+// ── STAGES ────────────────────────────────────────────────────────────────
 function updateStages() {
-  const crop = document.getElementById('f_crop').value;
-  const sel  = document.getElementById('f_stage');
-  sel.innerHTML = '<option value="">Select...</option>';
-  (STAGES[crop]||[]).forEach(s => { const o=document.createElement('option'); o.value=o.textContent=s; sel.appendChild(o); });
+  const crop=document.getElementById('f_crop').value, sel=document.getElementById('f_stage');
+  sel.innerHTML='<option value="">Select...</option>';
+  (STAGES[crop]||[]).forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o);});
   checkVal();
 }
 
-// ── atLEAF CHECK ───────────────────────────────────────────────────────────
 function checkVal() {
-  const val   = parseFloat(document.getElementById('f_atleaf').value);
-  const crop  = document.getElementById('f_crop').value;
-  const stage = document.getElementById('f_stage').value;
-  const inp   = document.getElementById('f_atleaf');
-  const warn  = document.getElementById('spadWarn');
+  const val=parseFloat(document.getElementById('f_atleaf').value);
+  const crop=document.getElementById('f_crop').value, stage=document.getElementById('f_stage').value;
+  const inp=document.getElementById('f_atleaf'), warn=document.getElementById('spadWarn');
   if (isNaN(val)) { inp.className='atleaf-inp'; warn.className='spad-warn'; return; }
-  if (val < 40 && crop==='Maize' && stage==='V6') {
-    inp.className='atleaf-inp low'; warn.className='spad-warn low';
-    warn.innerHTML='⚠️  Below V6 diagnostic threshold — N response likely. Rule out water stress & S deficiency first.';
-  } else if (val < 32) {
-    inp.className='atleaf-inp low'; warn.className='spad-warn low';
-    warn.innerHTML='⚠️  Very low reading — investigate N, S, water stress, and disease.';
-  } else {
-    inp.className='atleaf-inp'; warn.className='spad-warn ok';
-    warn.innerHTML='✓  Reading recorded';
-  }
+  if (val<40 && crop==='Maize' && stage==='V6') { inp.className='atleaf-inp low'; warn.className='spad-warn low'; warn.innerHTML='⚠️  Below V6 diagnostic threshold — N response likely. Rule out water stress & S deficiency first.'; }
+  else if (val<32) { inp.className='atleaf-inp low'; warn.className='spad-warn low'; warn.innerHTML='⚠️  Very low reading — investigate N, S, water stress, and disease.'; }
+  else { inp.className='atleaf-inp'; warn.className='spad-warn ok'; warn.innerHTML='✓  Reading recorded'; }
 }
 
-// ── AI ─────────────────────────────────────────────────────────────────────
+// ── AI ────────────────────────────────────────────────────────────────────
 async function getAI() {
   if (!apiKey) { toast('Set your Claude API key in Setup first','e'); return; }
-  const atleaf = document.getElementById('f_atleaf').value;
-  const crop   = document.getElementById('f_crop').value;
-  const stage  = document.getElementById('f_stage').value;
+  const atleaf=document.getElementById('f_atleaf').value, crop=document.getElementById('f_crop').value, stage=document.getElementById('f_stage').value;
   if (!atleaf||!crop||!stage) { toast('Fill Crop, Stage, and atLEAF value first','e'); return; }
 
-  const msg = `
-Farmer: ${document.getElementById('f_farmer').value||'not specified'}
+  const msg = `Farmer: ${document.getElementById('f_farmer').value||'not specified'}
 Date: ${document.getElementById('f_date').value}
-GPS: ${gpsLat ? gpsLat+', '+gpsLon : 'unavailable'}
-Rainfall last 14 days: ${rainfallMm ? rainfallMm+' mm' : 'unavailable'}
+GPS: ${gpsLat?gpsLat+', '+gpsLon:'unavailable'}
+Rainfall last 14 days: ${rainfallMm?rainfallMm+' mm':'unavailable'}
 Crop: ${crop} | Variety: ${document.getElementById('f_variety').value||'not specified'} | FAO: ${document.getElementById('f_fao').value||'not specified'}
 Growth Stage: ${stage} | Leaf Position: ${document.getElementById('f_leaf_pos').value||'not specified'}
 atLEAF Average (5-plant): ${atleaf} units
 N Applied: ${document.getElementById('f_n_rate').value||'not specified'} kg N/ha on ${document.getElementById('f_n_date').value||'unknown date'}
 Soil Type: ${document.getElementById('f_soil').value||'not specified'} | Previous Crop: ${document.getElementById('f_prev_crop').value||'not specified'}
-Visual Observations: ${document.getElementById('f_visual').value||'none'}
-`.trim();
+Visual Observations: ${document.getElementById('f_visual').value||'none'}`;
 
-  const box  = document.getElementById('aiResult');
-  const cont = document.getElementById('aiResultContent');
+  const box=document.getElementById('aiResult'), cont=document.getElementById('aiResultContent');
   box.classList.add('show');
-  cont.innerHTML = `<div class="ai-thinking"><div class="spinner"></div>Analysing field data...</div>`;
-
-  const btn = document.getElementById('btnAI');
-  btn.disabled=true;
-  btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-color:rgba(255,255,255,0.3);border-top-color:#fff"></div> Interpreting...';
+  cont.innerHTML='<div class="ai-thinking"><div class="spinner"></div>Analysing field data...</div>';
+  const btn=document.getElementById('btnAI');
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-color:rgba(255,255,255,0.3);border-top-color:#fff"></div> Interpreting...';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:SYSTEM_PROMPT, messages:[{role:'user',content:msg}] })
-    });
-    const data = await res.json();
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,system:SYSTEM_PROMPT,messages:[{role:'user',content:msg}]})});
+    const data=await res.json();
     if (data.error) { cont.innerHTML=`<span style="color:var(--red)">API Error: ${data.error.message}</span>`; }
     else {
-      const raw = data.content[0].text;
-      lastAIResult = raw;
-      try {
-        const clean = raw.replace(/```json|```/g,'').trim();
-        lastAIParsed = JSON.parse(clean);
-        renderAI(lastAIParsed);
-        document.getElementById('aiTimestamp').textContent = new Date().toLocaleTimeString();
-        toast('Interpretation complete ✓','s');
-      } catch {
-        cont.innerHTML = `<div class="ai-detail-text" style="white-space:pre-wrap">${raw}</div>`;
-        lastAIParsed = null;
-      }
+      const raw=data.content[0].text; lastAIResult=raw;
+      try { lastAIParsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); renderAI(lastAIParsed, cont); document.getElementById('aiTimestamp').textContent=new Date().toLocaleTimeString(); toast('Interpretation complete ✓','s'); }
+      catch { cont.innerHTML=`<div style="font-size:13px;white-space:pre-wrap;line-height:1.7">${raw}</div>`; lastAIParsed=null; }
     }
-  } catch(err) {
-    cont.innerHTML=`<span style="color:var(--red)">Connection error: ${err.message}</span>`;
-  }
+  } catch(err) { cont.innerHTML=`<span style="color:var(--red)">Connection error: ${err.message}</span>`; }
 
   btn.disabled=false; btn.innerHTML='✦ Interpret with AI';
 }
 
-function renderAI(p) {
-  const isLow = p.conclusion_level==='low' || p.conclusion_level==='borderline';
-  const confClass = { 'High':'conf-high','Medium':'conf-medium','Low':'conf-low' }[p.confidence] || 'conf-medium';
-
-  // Papers used
-  const paperLinks = (p.papers||[]).map(key => {
-    const ref = PAPERS[key];
-    if (!ref) return `<div class="ref-item"><span>${key}</span></div>`;
+// ── RENDER AI (reusable) ──────────────────────────────────────────────────
+function renderAI(p, container) {
+  const isLow = p.conclusion_level==='low'||p.conclusion_level==='borderline';
+  const confClass = {'High':'conf-high','Medium':'conf-medium','Low':'conf-low'}[p.confidence]||'conf-medium';
+  const paperLinks = (p.papers||[]).map(key=>{
+    const ref=PAPERS[key];
+    if(!ref) return `<div class="ref-item"><span>${key}</span></div>`;
     return `<div class="ref-item"><a href="${ref.url}" target="_blank">[↗]</a><span>${ref.cite}</span></div>`;
   }).join('');
 
-  document.getElementById('aiResultContent').innerHTML = `
+  container.innerHTML = `
     <div class="ai-conclusion ${isLow?'warn':''}">
       <div class="ai-conclusion-label">CONCLUSION</div>
       <div class="ai-conclusion-text">${p.conclusion}</div>
     </div>
-
     <div class="ai-action">
       <div class="ai-action-label">RECOMMENDED ACTIONS</div>
       ${(p.actions||[]).map(a=>`<div class="ai-action-item">${a}</div>`).join('')}
     </div>
-
     <div class="ai-detail">
       <div class="ai-detail-label">RAINFALL & STRESS CONTEXT</div>
       <div class="ai-detail-text">${p.stress_context}</div>
     </div>
-
     <div class="ai-detail">
       <div class="ai-detail-label">DIFFERENTIAL DIAGNOSIS</div>
       <div class="ai-detail-text">${p.differential}</div>
     </div>
-
     <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
       <div class="ai-detail-label" style="margin:0">CONFIDENCE</div>
       <span class="confidence-chip ${confClass}">${p.confidence} — ${p.confidence_reason}</span>
     </div>
-
-    ${paperLinks ? `<div class="refs-box" style="margin-top:12px">
-      <div class="refs-label">SCIENTIFIC BASIS</div>
-      ${paperLinks}
-    </div>` : ''}
+    ${paperLinks?`<div class="refs-box" style="margin-top:12px"><div class="refs-label">SCIENTIFIC BASIS</div>${paperLinks}</div>`:''}
   `;
 }
 
-// ── CONFIRM MODAL ──────────────────────────────────────────────────────────
+// ── CONFIRM ───────────────────────────────────────────────────────────────
 function showConfirm() {
-  const required = { f_farmer:'Farmer Name',f_date:'Date',f_time:'Time',f_device:'Device ID',f_meas_id:'Measurement ID',f_crop:'Crop',f_stage:'Growth Stage',f_variety:'Variety',f_leaf_pos:'Leaf Position',f_n_rate:'N Rate' };
-  for (const [id,label] of Object.entries(required)) {
-    if (!document.getElementById(id).value.trim()) { toast(label+' is required','e'); return; }
-  }
+  const req={f_farmer:'Farmer Name',f_date:'Date',f_time:'Time',f_device:'Device ID',f_meas_id:'Measurement ID',f_crop:'Crop',f_stage:'Growth Stage',f_variety:'Variety',f_leaf_pos:'Leaf Position',f_n_rate:'N Rate'};
+  for (const [id,label] of Object.entries(req)) { if(!document.getElementById(id).value.trim()){toast(label+' is required','e');return;} }
   if (!document.getElementById('f_atleaf').value) { toast('Enter the atLEAF average value','e'); return; }
-
-  const atleaf = parseFloat(document.getElementById('f_atleaf').value);
-  const low    = atleaf < 40;
-
-  const rows = [
+  const avg=parseFloat(document.getElementById('f_atleaf').value), low=avg<40;
+  document.getElementById('confirmRows').innerHTML = [
     ['Farmer',    document.getElementById('f_farmer').value],
-    ['Date / Time', document.getElementById('f_date').value + ' ' + document.getElementById('f_time').value],
-    ['Crop',      document.getElementById('f_crop').value + ' — ' + document.getElementById('f_stage').value],
-    ['Variety',   document.getElementById('f_variety').value + (document.getElementById('f_fao').value ? ' (FAO '+document.getElementById('f_fao').value+')' : '')],
-    ['N Applied', document.getElementById('f_n_rate').value + ' kg N/ha'],
-    ['Rainfall',  rainfallMm ? rainfallMm+' mm (last 14d)' : 'not available'],
-    ['AI done',   lastAIParsed ? '✓ Yes' : '— Not yet'],
-  ];
-
-  document.getElementById('confirmRows').innerHTML = `
-    ${rows.map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('')}
-    <div class="modal-row" style="border-top:2px solid var(--border);margin-top:4px">
-      <span class="modal-key">atLEAF Avg</span>
-      <span class="modal-atleaf ${low?'low':''}">${atleaf.toFixed(1)}</span>
-    </div>
-  `;
+    ['Date / Time', document.getElementById('f_date').value+' '+document.getElementById('f_time').value],
+    ['Crop',      document.getElementById('f_crop').value+' — '+document.getElementById('f_stage').value],
+    ['Variety',   document.getElementById('f_variety').value+(document.getElementById('f_fao').value?' (FAO '+document.getElementById('f_fao').value+')':'')],
+    ['N Applied', document.getElementById('f_n_rate').value+' kg N/ha'],
+    ['Rainfall',  rainfallMm?rainfallMm+' mm (last 14d)':'not available'],
+    ['AI done',   lastAIParsed?'✓ Yes':'— Not yet'],
+  ].map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('')
+  + `<div class="modal-row" style="border-top:2px solid var(--border);margin-top:4px"><span class="modal-key">atLEAF Avg</span><span class="modal-atleaf ${low?'low':''}">${avg.toFixed(1)}</span></div>`;
   document.getElementById('confirmModal').classList.add('show');
 }
-
-function closeModal() { document.getElementById('confirmModal').classList.remove('show'); }
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); }
 
 async function doSubmit() {
-  closeModal();
-  const r = {
-    id: Date.now(), sales_rep: userName||'unknown',
-    farmer:    document.getElementById('f_farmer').value.trim(),
-    date:      document.getElementById('f_date').value,
-    time:      document.getElementById('f_time').value,
-    lat: gpsLat||'', lon: gpsLon||'', rainfall: rainfallMm||'',
-    device_id: document.getElementById('f_device').value.trim(),
-    meas_id:   document.getElementById('f_meas_id').value.trim(),
-    crop:      document.getElementById('f_crop').value,
-    variety:   document.getElementById('f_variety').value.trim(),
-    fao:       document.getElementById('f_fao').value,
-    stage:     document.getElementById('f_stage').value,
-    leaf_pos:  document.getElementById('f_leaf_pos').value,
-    atleaf_avg: document.getElementById('f_atleaf').value,
-    n_rate:    document.getElementById('f_n_rate').value,
-    n_date:    document.getElementById('f_n_date').value,
-    soil:      document.getElementById('f_soil').value,
-    prev_crop: document.getElementById('f_prev_crop').value,
-    visual:    document.getElementById('f_visual').value.trim(),
-    ai_interpretation: lastAIResult,
-    synced: false,
+  closeConfirm();
+  const r={
+    id:Date.now(), sales_rep:userName||'unknown',
+    farmer:document.getElementById('f_farmer').value.trim(),
+    date:document.getElementById('f_date').value, time:document.getElementById('f_time').value,
+    lat:gpsLat||'', lon:gpsLon||'', rainfall:rainfallMm||'',
+    device_id:document.getElementById('f_device').value.trim(), meas_id:document.getElementById('f_meas_id').value.trim(),
+    crop:document.getElementById('f_crop').value, variety:document.getElementById('f_variety').value.trim(),
+    fao:document.getElementById('f_fao').value, stage:document.getElementById('f_stage').value,
+    leaf_pos:document.getElementById('f_leaf_pos').value,
+    atleaf_avg:document.getElementById('f_atleaf').value,
+    n_rate:document.getElementById('f_n_rate').value, n_date:document.getElementById('f_n_date').value,
+    soil:document.getElementById('f_soil').value, prev_crop:document.getElementById('f_prev_crop').value,
+    visual:document.getElementById('f_visual').value.trim(),
+    ai_interpretation:lastAIResult, synced:false,
   };
-
-  records.unshift(r);
-  localStorage.setItem('spad_v5', JSON.stringify(records));
-
-  const btn = document.getElementById('btnSubmit');
-  btn.disabled=true; btn.textContent='Saving...';
-
+  records.unshift(r); localStorage.setItem('spad_v6',JSON.stringify(records));
+  const btn=document.getElementById('btnSubmit'); btn.disabled=true; btn.textContent='Saving...';
   if (gasUrl) {
-    try {
-      await fetch(gasUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)});
-      r.synced=true; localStorage.setItem('spad_v5',JSON.stringify(records));
-      toast('Saved & synced to Sheets ✓','s');
-    } catch { toast('Saved locally (offline)','e'); }
+    try { await fetch(gasUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)}); r.synced=true; localStorage.setItem('spad_v6',JSON.stringify(records)); toast('Saved & synced to Sheets ✓','s'); }
+    catch { toast('Saved locally (offline)','e'); }
   } else { toast('Saved locally ✓','s'); }
-
   btn.disabled=false; btn.textContent='Save Record';
   resetForm();
 }
 
 function resetForm() {
-  const now = new Date();
-  document.getElementById('f_date').value = now.toISOString().split('T')[0];
-  document.getElementById('f_time').value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const now=new Date();
+  document.getElementById('f_date').value=now.toISOString().split('T')[0];
+  document.getElementById('f_time').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   ['f_farmer','f_meas_id','f_variety','f_fao','f_atleaf','f_n_rate','f_n_date','f_visual'].forEach(id=>document.getElementById(id).value='');
   ['f_crop','f_stage','f_soil','f_prev_crop','f_leaf_pos'].forEach(id=>document.getElementById(id).selectedIndex=0);
   document.getElementById('f_stage').innerHTML='<option value="">Select crop first</option>';
@@ -865,7 +784,66 @@ function resetForm() {
   lastAIResult=''; lastAIParsed=null;
 }
 
-// ── RECORDS ────────────────────────────────────────────────────────────────
+// ── DETAIL MODAL ──────────────────────────────────────────────────────────
+function openDetail(idx) {
+  const r = records[idx];
+  if (!r) return;
+  const avg = parseFloat(r.atleaf_avg), low = avg < 40;
+
+  document.getElementById('d_farmer').textContent = r.farmer;
+  document.getElementById('d_meta').textContent   = `${r.date} · ${r.sales_rep} · ${r.synced?'☁️ synced':'💾 local'}`;
+  const badge = document.getElementById('d_atleaf');
+  badge.textContent = avg.toFixed(1);
+  badge.className   = 'detail-atleaf-badge' + (low?' low':'');
+
+  // Build body
+  const grid = [
+    ['Crop',        r.crop],
+    ['Stage',       r.stage],
+    ['Variety',     r.variety + (r.fao?' · FAO '+r.fao:'')],
+    ['Leaf pos',    r.leaf_pos||'—'],
+    ['N Applied',   r.n_rate ? r.n_rate+' kg N/ha' : '—'],
+    ['N Date',      r.n_date||'—'],
+    ['Rainfall 14d', r.rainfall ? r.rainfall+' mm' : '—'],
+    ['Soil',        r.soil||'—'],
+    ['Prev crop',   r.prev_crop||'—'],
+    ['Device',      r.device_id + ' · #' + r.meas_id],
+  ].map(([k,v])=>`<div class="detail-cell"><div class="detail-cell-label">${k}</div><div class="detail-cell-val">${v}</div></div>`).join('');
+
+  const visualHtml = r.visual ? `
+    <div class="detail-visual">
+      <div class="detail-visual-label">VISUAL OBSERVATIONS</div>
+      <div class="detail-visual-text">${r.visual}</div>
+    </div>` : '';
+
+  let aiHtml = '';
+  if (r.ai_interpretation) {
+    try {
+      const p = JSON.parse(r.ai_interpretation.replace(/```json|```/g,'').trim());
+      const tmp = document.createElement('div');
+      renderAI(p, tmp);
+      aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">✦ AI INTERPRETATION</div>${tmp.innerHTML}</div>`;
+    } catch {
+      aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">✦ AI INTERPRETATION</div><div style="font-size:12px;line-height:1.7;white-space:pre-wrap">${r.ai_interpretation}</div></div>`;
+    }
+  } else {
+    aiHtml = `<div class="detail-no-ai">No AI interpretation recorded for this visit.</div>`;
+  }
+
+  document.getElementById('d_body').innerHTML = `
+    <div class="detail-grid">${grid}</div>
+    ${visualHtml}
+    ${aiHtml}
+  `;
+
+  document.getElementById('detailModal').classList.add('show');
+  document.getElementById('detailSheet').scrollTop = 0;
+}
+
+function closeDetail() { document.getElementById('detailModal').classList.remove('show'); }
+function closeDetailIfBg(e) { if (e.target === document.getElementById('detailModal')) closeDetail(); }
+
+// ── RECORDS ───────────────────────────────────────────────────────────────
 function renderRecords() {
   const total=records.length, flagged=records.filter(r=>parseFloat(r.atleaf_avg)<40).length, synced=records.filter(r=>r.synced).length;
   document.getElementById('stats').innerHTML=`
@@ -874,11 +852,11 @@ function renderRecords() {
     <div class="stat"><div class="stat-n">${synced}</div><div class="stat-l">SYNCED ☁️</div></div>`;
   const list=document.getElementById('recList');
   if(!records.length){list.innerHTML='<div class="empty">No records yet.</div>';return;}
-  list.innerHTML=records.map(r=>{
+  list.innerHTML=records.map((r,i)=>{
     const avg=parseFloat(r.atleaf_avg), low=avg<40;
     let conclusion='';
-    try { const p=JSON.parse(r.ai_interpretation.replace(/```json|```/g,'').trim()); conclusion=p.conclusion||''; } catch{}
-    return `<div class="card ${low?'flag':''}">
+    try { conclusion=JSON.parse(r.ai_interpretation.replace(/```json|```/g,'').trim()).conclusion||''; } catch{}
+    return `<div class="card ${low?'flag':''}" onclick="openDetail(${i})">
       <div class="card-top">
         <div><div class="card-name">${r.farmer}</div><div class="card-meta">${r.date} · ${r.sales_rep} · ${r.synced?'☁️':'💾'}</div></div>
         <div style="text-align:right"><div class="spad-big ${low?'low':''}">${avg.toFixed(1)}</div><div class="spad-lbl2">atLEAF avg</div></div>
@@ -894,6 +872,7 @@ function renderRecords() {
         <div style="font-size:11px;color:var(--gray)">${r.device_id} · #${r.meas_id}</div>
         <div class="flag-pill ${low?'low':'ok'}">${low?'⚠ BELOW THRESHOLD':'✓ OK'}</div>
       </div>
+      <div class="tap-hint">tap to view full diagnosis →</div>
     </div>`;
   }).join('');
 }
@@ -907,7 +886,7 @@ function exportCSV() {
   toast('CSV exported ✓','s');
 }
 
-// ── TABS ───────────────────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -915,7 +894,7 @@ function switchTab(tab,btn){
   if(tab==='records') renderRecords();
 }
 
-// ── SETUP ──────────────────────────────────────────────────────────────────
+// ── SETUP ─────────────────────────────────────────────────────────────────
 function saveName(){ const n=document.getElementById('userName').value.trim(); if(!n){toast('Enter your name','e');return;} userName=n; localStorage.setItem('spad_user',n); document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=n; toast('Name saved ✓','s'); }
 function saveApiKey(){ const k=document.getElementById('apiKey').value.trim(); if(!k.startsWith('sk-ant-')){toast('Invalid API key format','e');return;} apiKey=k; localStorage.setItem('spad_api_key',k); document.getElementById('apiKeySaved').style.display='flex'; document.getElementById('apiWarn').classList.remove('show'); toast('API key saved ✓','s'); }
 function saveUrl(){ const u=document.getElementById('gasUrl').value.trim(); if(!u.startsWith('https://script.google.com')){toast('Paste a valid Apps Script URL','e');return;} gasUrl=u; localStorage.setItem('spad_gas_url',u); document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); toast('Connected ✓','s'); }
