@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SPAD Field App — Alcedo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -280,6 +284,61 @@
   .toast.e { background: var(--red);   color: var(--white); }
   .toast.show { display: block; animation: tUp 0.3s ease; }
   @keyframes tUp { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+  /* ═══ MAP STYLES ═══ */
+  .mini-map {
+    width: 100%; height: 140px; border-radius: 10px;
+    border: 1.5px solid var(--border); margin-bottom: 10px;
+    overflow: hidden; position: relative;
+  }
+  .mini-map.hidden { display: none; }
+  .records-map {
+    width: 100%; height: 240px; border-radius: 12px;
+    border: 1.5px solid var(--border); margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .detail-map {
+    width: 100%; height: 180px; border-radius: 10px;
+    border: 1.5px solid var(--border); margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .btn-gmaps {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px;
+    background: var(--white); color: var(--forest);
+    border: 1.5px solid var(--forest); font-size: 12px; font-weight: 600;
+    text-decoration: none; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-gmaps:hover { background: var(--forest); color: var(--white); }
+  .btn-gmaps-sm {
+    padding: 4px 10px; font-size: 11px; border-radius: 6px;
+    background: var(--white); color: var(--forest);
+    border: 1px solid var(--forest); text-decoration: none;
+    font-weight: 600; font-family: 'DM Sans', sans-serif;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn-gmaps-sm:hover { background: var(--forest); color: var(--white); }
+  .map-legend {
+    display: flex; gap: 12px; justify-content: center;
+    padding: 6px; font-size: 10px; color: var(--gray);
+    background: var(--gray-light); border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .map-legend-dot {
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .map-legend-dot::before {
+    content: ''; width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block;
+  }
+  .map-legend-dot.ok::before    { background: var(--teal); }
+  .map-legend-dot.low::before   { background: var(--amber); }
+  .leaflet-popup-content {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 12px; line-height: 1.5;
+  }
+  .leaflet-popup-content strong { color: var(--forest); }
 </style>
 </head>
 <body>
@@ -348,6 +407,14 @@
   </div>
   <div class="info-bar neutral" id="weatherBar">
     <span>🌧️</span><span id="weatherText">Rainfall loads after GPS...</span>
+  </div>
+
+  <!-- Mini map + Google Maps button (shown once GPS acquired) -->
+  <div class="mini-map hidden" id="miniMap"></div>
+  <div id="miniMapActions" style="display:none;margin-bottom:12px;text-align:center;">
+    <a href="#" id="gmapsLinkEntry" target="_blank" class="btn-gmaps">
+      📍 Open in Google Maps
+    </a>
   </div>
 
   <div class="sec">VISIT INFO <span class="badge badge-m">MUST</span></div>
@@ -469,6 +536,11 @@
     <button class="btn-exp" onclick="exportCSV()">Export CSV</button>
   </div>
   <div class="stats" id="stats"></div>
+  <div class="map-legend">
+    <span class="map-legend-dot ok">OK</span>
+    <span class="map-legend-dot low">Below threshold</span>
+  </div>
+  <div class="records-map" id="recordsMap"></div>
   <div id="recList"></div>
 </div>
 </div>
@@ -626,6 +698,9 @@ let myDevice = localStorage.getItem('spad_my_device') || '';
 let gpsLat = null, gpsLon = null, rainfallMm = null;
 let lastAIResult = '', lastAIParsed = null;
 let measCounter  = parseInt(localStorage.getItem('spad_meas_counter') || '0');
+let miniMapInstance = null, miniMapMarker = null;
+let recordsMapInstance = null;
+let detailMapInstance = null;
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -655,8 +730,8 @@ function getGPS() {
   setBar('weatherBar','neutral','🌧️','Rainfall loads after GPS...',false);
   if (!navigator.geolocation) { setBar('gpsBar','fail','❌','GPS not supported',true); return; }
   navigator.geolocation.getCurrentPosition(
-    p => { gpsLat=p.coords.latitude.toFixed(5); gpsLon=p.coords.longitude.toFixed(5); setBar('gpsBar','ok','✅',gpsLat+', '+gpsLon,true); fetchRainfall(gpsLat,gpsLon); },
-    () => { gpsLat=null; gpsLon=null; setBar('gpsBar','fail','⚠️','GPS failed — needs HTTPS',true); setBar('weatherBar','neutral','—','Rainfall unavailable',false); },
+    p => { gpsLat=p.coords.latitude.toFixed(5); gpsLon=p.coords.longitude.toFixed(5); setBar('gpsBar','ok','✅',gpsLat+', '+gpsLon,true); fetchRainfall(gpsLat,gpsLon); showMiniMap(); },
+    () => { gpsLat=null; gpsLon=null; setBar('gpsBar','fail','⚠️','GPS failed — needs HTTPS',true); setBar('weatherBar','neutral','—','Rainfall unavailable',false); hideMiniMap(); },
     { enableHighAccuracy:true, timeout:10000 }
   );
 }
@@ -959,13 +1034,22 @@ function resetForm() {
 function openDetail(idx) {
   const r = records[idx];
   if (!r) return;
-  const avg = parseFloat(r.atleaf_avg), low = avg < 40;
+  // Use SPAD equiv if available, else atLEAF to determine low
+  const spadVal   = parseFloat(r.spad_equiv);
+  const atleafVal = parseFloat(r.atleaf_avg);
+  const low = (!isNaN(spadVal) && spadVal < 43.4) ||
+              (isNaN(spadVal) && !isNaN(atleafVal) && atleafVal < 53.7);
+  const displayMain = !isNaN(spadVal) ? spadVal.toFixed(1) : (!isNaN(atleafVal) ? atleafVal.toFixed(1) : '—');
+  const displayLbl  = !isNaN(spadVal) ? 'SPAD' : 'atLEAF';
 
   document.getElementById('d_farmer').textContent = r.farmer;
   document.getElementById('d_meta').textContent   = `${r.date} · ${r.sales_rep} · ${r.synced?'☁️ synced':'💾 local'}`;
   const badge = document.getElementById('d_atleaf');
-  badge.textContent = avg.toFixed(1);
+  badge.textContent = displayMain;
   badge.className   = 'detail-atleaf-badge' + (low?' low':'');
+  // Update label under badge
+  const badgeLabel = badge.nextElementSibling;
+  if (badgeLabel) badgeLabel.textContent = displayLbl + ' value';
 
   // Build body
   const grid = [
@@ -978,7 +1062,7 @@ function openDetail(idx) {
     ['Rainfall 14d', r.rainfall ? r.rainfall+' mm' : '—'],
     ['Soil',        r.soil||'—'],
     ['Prev crop',   r.prev_crop||'—'],
-    ['atLEAF Avg',  r.atleaf_avg + ' units'],
+    ['atLEAF Avg',  r.atleaf_avg ? r.atleaf_avg + ' units' : '—'],
     ['SPAD Equiv',  r.spad_equiv ? r.spad_equiv + ' SPAD' : '—'],
     ['Device',      r.device_id + ' · #' + r.meas_id],
   ].map(([k,v])=>`<div class="detail-cell"><div class="detail-cell-label">${k}</div><div class="detail-cell-val">${v}</div></div>`).join('');
@@ -987,6 +1071,18 @@ function openDetail(idx) {
     <div class="detail-visual">
       <div class="detail-visual-label">VISUAL OBSERVATIONS</div>
       <div class="detail-visual-text">${r.visual}</div>
+    </div>` : '';
+
+  // Map + Google Maps link
+  const mapHtml = r.lat && r.lon ? `
+    <div style="margin-bottom:12px;">
+      <div class="detail-visual-label" style="margin-bottom:6px;">LOCATION</div>
+      <div class="detail-map" id="detailMapContainer"></div>
+      <div style="text-align:center;margin-top:6px;">
+        <a href="https://maps.google.com/?q=${r.lat},${r.lon}" target="_blank" class="btn-gmaps">
+          📍 Open in Google Maps
+        </a>
+      </div>
     </div>` : '';
 
   let aiHtml = '';
@@ -1011,12 +1107,18 @@ function openDetail(idx) {
 
   document.getElementById('d_body').innerHTML = `
     <div class="detail-grid">${grid}</div>
+    ${mapHtml}
     ${visualHtml}
     ${aiHtml}
   `;
 
   document.getElementById('detailModal').classList.add('show');
   document.getElementById('detailSheet').scrollTop = 0;
+
+  // Render map after modal is shown
+  if (r.lat && r.lon) {
+    setTimeout(() => renderDetailMap('detailMapContainer', r.lat, r.lon, r.farmer), 150);
+  }
 }
 
 function closeDetail() { document.getElementById('detailModal').classList.remove('show'); }
@@ -1024,7 +1126,11 @@ function closeDetailIfBg(e) { if (e.target === document.getElementById('detailMo
 
 // ── RECORDS ───────────────────────────────────────────────────────────────
 function renderRecords() {
-  const total=records.length, flagged=records.filter(r=>parseFloat(r.atleaf_avg)<40).length, synced=records.filter(r=>r.synced).length;
+  const isLowRec = r => {
+    const sp = parseFloat(r.spad_equiv), at = parseFloat(r.atleaf_avg);
+    return (!isNaN(sp) && sp < 43.4) || (isNaN(sp) && !isNaN(at) && at < 53.7);
+  };
+  const total=records.length, flagged=records.filter(isLowRec).length, synced=records.filter(r=>r.synced).length;
   document.getElementById('stats').innerHTML=`
     <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">TOTAL</div></div>
     <div class="stat"><div class="stat-n a">${flagged}</div><div class="stat-l">FLAGGED</div></div>
@@ -1032,7 +1138,10 @@ function renderRecords() {
   const list=document.getElementById('recList');
   if(!records.length){list.innerHTML='<div class="empty">No records yet.</div>';return;}
   list.innerHTML=records.map((r,i)=>{
-    const avg=parseFloat(r.atleaf_avg), low=avg<40;
+    const sp=parseFloat(r.spad_equiv), at=parseFloat(r.atleaf_avg);
+    const low = isLowRec(r);
+    const displayVal = !isNaN(sp) ? sp.toFixed(1) : (!isNaN(at) ? at.toFixed(1) : '—');
+    const displayLbl = !isNaN(sp) ? 'SPAD' : 'atLEAF';
     let conclusion='';
     try { conclusion=(() => {
         let s = r.ai_interpretation;
@@ -1041,10 +1150,13 @@ function renderRecords() {
         if(fb!==-1&&lb!==-1) s=s.slice(fb,lb+1);
         return JSON.parse(s);
       })().conclusion||''; } catch{}
+    const gmapsBtn = r.lat && r.lon
+      ? `<a href="https://maps.google.com/?q=${r.lat},${r.lon}" target="_blank" class="btn-gmaps-sm" onclick="event.stopPropagation()">📍</a>`
+      : '';
     return `<div class="card ${low?'flag':''}" onclick="openDetail(${i})">
       <div class="card-top">
         <div><div class="card-name">${r.farmer}</div><div class="card-meta">${r.date} · ${r.sales_rep} · ${r.synced?'☁️':'💾'}</div></div>
-        <div style="text-align:right"><div class="spad-big ${low?'low':''}">${avg.toFixed(1)}</div><div class="spad-lbl2">atLEAF avg</div></div>
+        <div style="text-align:right"><div class="spad-big ${low?'low':''}">${displayVal}</div><div class="spad-lbl2">${displayLbl}</div></div>
       </div>
       <div class="chips">
         <span class="chip">${r.crop}</span><span class="chip">${r.stage}</span>
@@ -1054,7 +1166,9 @@ function renderRecords() {
       </div>
       ${conclusion?`<div class="ai-snippet">${conclusion}</div>`:''}
       <div class="card-bot">
-        <div style="font-size:11px;color:var(--gray)">${r.device_id} · #${r.meas_id}</div>
+        <div style="font-size:11px;color:var(--gray);display:flex;align-items:center;gap:8px;">
+          ${r.device_id} · #${r.meas_id} ${gmapsBtn}
+        </div>
         <div class="flag-pill ${low?'low':'ok'}">${low?'⚠ BELOW THRESHOLD':'✓ OK'}</div>
       </div>
       <div class="tap-hint">tap to view full diagnosis →</div>
@@ -1071,12 +1185,150 @@ function exportCSV() {
   toast('CSV exported ✓','s');
 }
 
+// ── MAP FUNCTIONS ─────────────────────────────────────────────────────────
+function showMiniMap() {
+  if (!gpsLat || !gpsLon) return;
+  const lat = parseFloat(gpsLat), lon = parseFloat(gpsLon);
+  const mapDiv     = document.getElementById('miniMap');
+  const actionsDiv = document.getElementById('miniMapActions');
+  mapDiv.classList.remove('hidden');
+  actionsDiv.style.display = 'block';
+
+  // Update Google Maps link
+  document.getElementById('gmapsLinkEntry').href =
+    `https://maps.google.com/?q=${lat},${lon}`;
+
+  // Init or update map
+  if (!miniMapInstance) {
+    miniMapInstance = L.map('miniMap', {
+      zoomControl: false, attributionControl: false,
+      dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+      touchZoom: false, boxZoom: false, tap: false
+    }).setView([lat, lon], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(miniMapInstance);
+  } else {
+    miniMapInstance.setView([lat, lon], 15);
+  }
+  if (miniMapMarker) miniMapInstance.removeLayer(miniMapMarker);
+  miniMapMarker = L.circleMarker([lat, lon], {
+    radius: 8, color: '#2C5F2D', weight: 2,
+    fillColor: '#97BC62', fillOpacity: 0.8
+  }).addTo(miniMapInstance);
+
+  // Fix sizing issue after tab display
+  setTimeout(() => miniMapInstance.invalidateSize(), 100);
+}
+
+function hideMiniMap() {
+  document.getElementById('miniMap').classList.add('hidden');
+  document.getElementById('miniMapActions').style.display = 'none';
+}
+
+function renderRecordsMap() {
+  const mapDiv = document.getElementById('recordsMap');
+  const geo = records.filter(r => r.lat && r.lon);
+
+  if (!geo.length) {
+    mapDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray);font-size:13px;">No geolocated records yet</div>';
+    return;
+  }
+  if (mapDiv.firstChild && mapDiv.firstChild.tagName !== 'DIV') {
+    // Wrong content, clear
+    mapDiv.innerHTML = '';
+  }
+
+  // Init or recreate
+  if (recordsMapInstance) {
+    recordsMapInstance.remove();
+    recordsMapInstance = null;
+  }
+  recordsMapInstance = L.map('recordsMap').setView([45.0, 25.0], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(recordsMapInstance);
+
+  const markers = [];
+  geo.forEach((r, idx) => {
+    const lat = parseFloat(r.lat), lon = parseFloat(r.lon);
+    // Determine colour: SPAD-equiv if exists, else atLEAF
+    const spadVal   = parseFloat(r.spad_equiv);
+    const atleafVal = parseFloat(r.atleaf_avg);
+    const isLow = (!isNaN(spadVal) && spadVal < 43.4) ||
+                  (isNaN(spadVal) && !isNaN(atleafVal) && atleafVal < 53.7);
+    const color = isLow ? '#D4841A' : '#1A6B5C';
+
+    const marker = L.circleMarker([lat, lon], {
+      radius: 9, color: '#fff', weight: 2,
+      fillColor: color, fillOpacity: 0.9
+    }).addTo(recordsMapInstance);
+
+    const displayVal = !isNaN(spadVal)
+      ? `SPAD ${spadVal.toFixed(1)}`
+      : (!isNaN(atleafVal) ? `atLEAF ${atleafVal.toFixed(1)}` : '—');
+
+    // Find original index for openDetail (records array order)
+    const origIdx = records.indexOf(r);
+
+    marker.bindPopup(`
+      <strong>${r.farmer}</strong><br>
+      ${r.crop} · ${r.stage}<br>
+      ${displayVal}<br>
+      <span style="color:#6B7280;font-size:11px">${r.date}</span><br>
+      <a href="https://maps.google.com/?q=${lat},${lon}" target="_blank"
+        class="btn-gmaps-sm" style="margin-top:6px;">📍 Google Maps</a>
+      <button onclick="openDetail(${origIdx})"
+        style="margin-top:4px;margin-left:4px;padding:4px 10px;font-size:11px;border-radius:6px;background:#2C5F2D;color:#fff;border:none;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">View details</button>
+    `);
+    markers.push(marker);
+  });
+
+  // Fit bounds to show all markers
+  if (markers.length === 1) {
+    recordsMapInstance.setView(markers[0].getLatLng(), 13);
+  } else if (markers.length > 1) {
+    const group = L.featureGroup(markers);
+    recordsMapInstance.fitBounds(group.getBounds(), { padding: [30, 30] });
+  }
+
+  setTimeout(() => recordsMapInstance.invalidateSize(), 100);
+}
+
+function renderDetailMap(containerId, lat, lon, farmer) {
+  const div = document.getElementById(containerId);
+  if (!lat || !lon) {
+    div.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray);font-size:12px;">No GPS recorded</div>';
+    return;
+  }
+  // Clear any previous instance
+  if (detailMapInstance) {
+    detailMapInstance.remove();
+    detailMapInstance = null;
+  }
+  div.innerHTML = '';
+  detailMapInstance = L.map(containerId, {
+    zoomControl: false, attributionControl: false,
+    dragging: false, scrollWheelZoom: false, doubleClickZoom: false
+  }).setView([parseFloat(lat), parseFloat(lon)], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(detailMapInstance);
+  L.circleMarker([parseFloat(lat), parseFloat(lon)], {
+    radius: 10, color: '#2C5F2D', weight: 2,
+    fillColor: '#97BC62', fillOpacity: 0.8
+  }).addTo(detailMapInstance);
+  setTimeout(() => detailMapInstance.invalidateSize(), 100);
+}
+
 // ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active'); document.getElementById('panel-'+tab).classList.add('active');
-  if(tab==='records') renderRecords();
+  if(tab==='records') { renderRecords(); renderRecordsMap(); }
+  if(tab==='entry' && gpsLat && gpsLon) setTimeout(()=>{ if(miniMapInstance) miniMapInstance.invalidateSize(); }, 100);
 }
 
 // ── SETUP ─────────────────────────────────────────────────────────────────
