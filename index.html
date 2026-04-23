@@ -780,13 +780,31 @@ Visual Observations: ${document.getElementById('f_visual').value||'none'}`;
   btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-color:rgba(255,255,255,0.3);border-top-color:#fff"></div> Interpreting...';
 
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,system:SYSTEM_PROMPT,messages:[{role:'user',content:msg}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:SYSTEM_PROMPT,messages:[{role:'user',content:msg}]})});
     const data=await res.json();
     if (data.error) { cont.innerHTML=`<span style="color:var(--red)">API Error: ${data.error.message}</span>`; }
     else {
       const raw=data.content[0].text; lastAIResult=raw;
-      try { lastAIParsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); renderAI(lastAIParsed, cont); document.getElementById('aiTimestamp').textContent=new Date().toLocaleTimeString(); toast('Interpretation complete ✓','s'); }
-      catch { cont.innerHTML=`<div style="font-size:13px;white-space:pre-wrap;line-height:1.7">${raw}</div>`; lastAIParsed=null; }
+      try {
+        // Strip markdown code blocks and extract JSON robustly
+        let jsonStr = raw;
+        // Remove ```json ... ``` or ``` ... ``` wrappers
+        jsonStr = jsonStr.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+        // If still not starting with {, find the first { and last }
+        const firstBrace = jsonStr.indexOf('{');
+        const lastBrace  = jsonStr.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          jsonStr = jsonStr.slice(firstBrace, lastBrace + 1);
+        }
+        lastAIParsed = JSON.parse(jsonStr);
+        renderAI(lastAIParsed, cont);
+        document.getElementById('aiTimestamp').textContent = new Date().toLocaleTimeString();
+        toast('Interpretation complete ✓','s');
+      } catch(parseErr) {
+        // Fallback: show raw text
+        cont.innerHTML = `<div style="font-size:13px;white-space:pre-wrap;line-height:1.7;color:var(--text)">${raw}</div>`;
+        lastAIParsed = null;
+      }
     }
   } catch(err) { cont.innerHTML=`<span style="color:var(--red)">Connection error: ${err.message}</span>`; }
 
@@ -935,7 +953,13 @@ function openDetail(idx) {
   let aiHtml = '';
   if (r.ai_interpretation) {
     try {
-      const p = JSON.parse(r.ai_interpretation.replace(/```json|```/g,'').trim());
+      const p = (() => {
+        let s = r.ai_interpretation;
+        s = s.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/i,'').trim();
+        const fb=s.indexOf('{'), lb=s.lastIndexOf('}');
+        if(fb!==-1&&lb!==-1) s=s.slice(fb,lb+1);
+        return JSON.parse(s);
+      })();
       const tmp = document.createElement('div');
       renderAI(p, tmp);
       aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">✦ AI INTERPRETATION</div>${tmp.innerHTML}</div>`;
@@ -971,7 +995,13 @@ function renderRecords() {
   list.innerHTML=records.map((r,i)=>{
     const avg=parseFloat(r.atleaf_avg), low=avg<40;
     let conclusion='';
-    try { conclusion=JSON.parse(r.ai_interpretation.replace(/```json|```/g,'').trim()).conclusion||''; } catch{}
+    try { conclusion=(() => {
+        let s = r.ai_interpretation;
+        s = s.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/i,'').trim();
+        const fb=s.indexOf('{'), lb=s.lastIndexOf('}');
+        if(fb!==-1&&lb!==-1) s=s.slice(fb,lb+1);
+        return JSON.parse(s);
+      })().conclusion||''; } catch{}
     return `<div class="card ${low?'flag':''}" onclick="openDetail(${i})">
       <div class="card-top">
         <div><div class="card-name">${r.farmer}</div><div class="card-meta">${r.date} · ${r.sales_rep} · ${r.synced?'☁️':'💾'}</div></div>
