@@ -359,8 +359,18 @@
 
   <div class="sec">MEASUREMENT ID <span class="badge badge-m">MUST</span></div>
   <div class="row c2">
-    <div class="f"><label>Device ID <span class="r">*</span></label><input type="text" id="f_device" class="m" placeholder="e.g. SPAD-03"></div>
-    <div class="f"><label>Measurement ID <span class="r">*</span></label><input type="text" id="f_meas_id" class="m" placeholder="e.g. 00142"></div>
+    <div class="f">
+      <label>Device ID <span class="r">*</span></label>
+      <input type="text" id="f_device" class="m" placeholder="e.g. atLEAF-01" readonly
+        style="background:var(--must-bg);color:var(--forest);cursor:default;">
+    </div>
+    <div class="f">
+      <label>Measurement ID</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="text" id="f_meas_id" class="o" placeholder="auto or from meter" style="flex:1;">
+        <button onclick="genMeasId()" style="padding:8px 10px;border-radius:6px;background:var(--gray-light);border:1.5px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;color:var(--gray);white-space:nowrap;font-family:'DM Sans',sans-serif;">Auto</button>
+      </div>
+    </div>
   </div>
 
   <div class="sec">CROP & STAGE <span class="badge badge-m">MUST</span></div>
@@ -384,9 +394,9 @@
       <option>Ear leaf</option><option>Last fully expanded leaf (sunflower)</option><option>Other</option>
     </select></div></div>
 
-  <div class="sec">atLEAF READING <span class="badge badge-m">MUST</span></div>
+  <div class="sec" style="background:#1A6B5C">SENSOR READING <span class="badge" style="background:#6EE7B7;color:#064E3B">ONE REQUIRED</span></div>
   <div style="font-size:11px;color:var(--teal);padding:6px 10px;background:var(--teal-bg);border-radius:6px;margin-bottom:10px;">
-    Enter the 5-plant average shown in the atLEAF app.
+    Enter atLEAF value (5-plant avg from app) OR direct SPAD value. At least one is required.
   </div>
   <!-- atLEAF input -->
   <div class="atleaf-wrap">
@@ -394,10 +404,10 @@
     <input type="number" class="atleaf-inp" id="f_atleaf" min="0" max="99.9" step="0.1" placeholder="—" oninput="checkVal()">
     <div class="atleaf-unit">atLEAF units</div>
   </div>
-  <!-- SPAD equivalent (auto-calculated, editable) -->
+  <!-- SPAD equivalent (auto-calculated, or direct SPAD entry) -->
   <div class="atleaf-wrap" style="background:var(--gray-light);border-color:var(--gray);margin-top:6px;" id="spadConvBox">
-    <div class="atleaf-lbl" style="color:var(--gray);">≈ SPAD equiv</div>
-    <input type="number" class="atleaf-inp" id="f_spad_equiv" min="0" max="100" step="0.1" placeholder="auto"
+    <div class="atleaf-lbl" style="color:var(--gray);">SPAD value</div>
+    <input type="number" class="atleaf-inp" id="f_spad_equiv" min="0" max="100" step="0.1" placeholder="auto / direct"
       style="color:var(--forest);border-bottom-color:var(--gray);"
       oninput="onSpadManualEdit()">
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:80px;">
@@ -475,6 +485,17 @@
         <div class="step-d">Set once. Attached to every record automatically.</div>
         <div class="inp-row"><input type="text" class="url-inp" id="userName" placeholder="e.g. ION_POPESCU"><button class="btn-save" onclick="saveName()">Save</button></div>
         <div class="ok-badge" id="nameSaved">✅ Saved</div>
+      </div>
+    </div>
+    <div class="step" style="margin-bottom:0">
+      <div class="step-n">📟</div>
+      <div class="step-c">
+        <div class="step-h">Your device ID</div>
+        <div class="step-d">The meter you carry. Pre-fills Device ID on every entry.<br>
+          <span style="color:var(--gray)">Examples: <code>atLEAF-01</code> · <code>atLEAF-02</code> · <code>SPAD-502</code></span>
+        </div>
+        <div class="inp-row"><input type="text" class="url-inp" id="myDevice" placeholder="e.g. atLEAF-01"><button class="btn-save" onclick="saveDevice()">Save</button></div>
+        <div class="ok-badge" id="deviceSaved">✅ Saved</div>
       </div>
     </div>
   </div>
@@ -597,12 +618,14 @@ const STAGES = {
   'Other':     ['Vegetative','Reproductive','Other'],
 };
 
-let records  = JSON.parse(localStorage.getItem('spad_v6') || '[]');
-let gasUrl   = localStorage.getItem('spad_gas_url') || '';
-let userName = localStorage.getItem('spad_user')    || '';
-let apiKey   = localStorage.getItem('spad_api_key') || '';
+let records  = JSON.parse(localStorage.getItem('spad_v12') || '[]');
+let gasUrl   = localStorage.getItem('spad_gas_url')   || '';
+let userName = localStorage.getItem('spad_user')      || '';
+let apiKey   = localStorage.getItem('spad_api_key')   || '';
+let myDevice = localStorage.getItem('spad_my_device') || '';
 let gpsLat = null, gpsLon = null, rainfallMm = null;
 let lastAIResult = '', lastAIParsed = null;
+let measCounter  = parseInt(localStorage.getItem('spad_meas_counter') || '0');
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -617,6 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (gasUrl)   { document.getElementById('gasUrl').value=gasUrl; document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); }
   if (apiKey)   { document.getElementById('apiKey').value=apiKey; document.getElementById('apiKeySaved').style.display='flex'; }
   else          { document.getElementById('apiWarn').classList.add('show'); }
+  if (myDevice) {
+    document.getElementById('myDevice').value = myDevice;
+    document.getElementById('deviceSaved').style.display = 'flex';
+    document.getElementById('f_device').value = myDevice;
+  }
+  genMeasId();
   getGPS();
 });
 
@@ -752,8 +781,11 @@ function onSpadManualEdit() {
 // ── AI ────────────────────────────────────────────────────────────────────
 async function getAI() {
   if (!apiKey) { toast('Set your Claude API key in Setup first','e'); return; }
-  const atleaf=document.getElementById('f_atleaf').value, crop=document.getElementById('f_crop').value, stage=document.getElementById('f_stage').value;
-  if (!atleaf||!crop||!stage) { toast('Fill Crop, Stage, and atLEAF value first','e'); return; }
+  const atleaf   = document.getElementById('f_atleaf').value;
+  const spadDirect = document.getElementById('f_spad_equiv').value;
+  const crop     = document.getElementById('f_crop').value;
+  const stage    = document.getElementById('f_stage').value;
+  if ((!atleaf && !spadDirect)||!crop||!stage) { toast('Fill Crop, Stage, and at least one sensor value first','e'); return; }
 
   const spadEquivVal = document.getElementById('f_spad_equiv').value;
   const spadEquivNote = spadManuallyEdited ? '(manually entered)' : '(auto-converted via Zhu et al. 2011)';
@@ -852,18 +884,22 @@ function showConfirm() {
   for (const [id,label] of Object.entries(req)) { if(!document.getElementById(id).value.trim()){toast(label+' is required','e');return;} }
   // FAO required for Maize
   if (document.getElementById('f_crop').value==='Maize' && !document.getElementById('f_fao').value) { toast('FAO Number is required for Maize','e'); return; }
-  if (!document.getElementById('f_atleaf').value) { toast('Enter the atLEAF average value','e'); return; }
-  const avg=parseFloat(document.getElementById('f_atleaf').value), low=avg<40;
+  // At least one of atLEAF or SPAD required
+  const hasAtleaf = document.getElementById('f_atleaf').value.trim() !== '';
+  const hasSpad   = document.getElementById('f_spad_equiv').value.trim() !== '';
+  if (!hasAtleaf && !hasSpad) { toast('Enter atLEAF value or SPAD value (at least one required)','e'); return; }
+  const atleafForConfirm=document.getElementById('f_atleaf').value; const avg=atleafForConfirm?parseFloat(atleafForConfirm):null; const low=avg!==null&&avg<53.7;
   document.getElementById('confirmRows').innerHTML = [
     ['Farmer',    document.getElementById('f_farmer').value],
     ['Date / Time', document.getElementById('f_date').value+' '+document.getElementById('f_time').value],
     ['Crop',      document.getElementById('f_crop').value+' — '+document.getElementById('f_stage').value],
     ['Variety',   document.getElementById('f_variety').value+(document.getElementById('f_fao').value?' (FAO '+document.getElementById('f_fao').value+')':'')],
+    ['atLEAF avg',  document.getElementById('f_atleaf').value || '—'],
+    ['SPAD value',  document.getElementById('f_spad_equiv').value || '—'],
     ['N Applied', document.getElementById('f_n_rate').value ? document.getElementById('f_n_rate').value+' kg N/ha' : 'not specified'],
     ['Rainfall',  rainfallMm?rainfallMm+' mm (last 14d)':'not available'],
     ['AI done',   lastAIParsed?'✓ Yes':'— Not yet'],
-  ].map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('')
-  + `<div class="modal-row" style="border-top:2px solid var(--border);margin-top:4px"><span class="modal-key">atLEAF Avg</span><span class="modal-atleaf ${low?'low':''}">${avg.toFixed(1)}</span></div>`;
+  ].map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('');
   document.getElementById('confirmModal').classList.add('show');
 }
 function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); }
@@ -910,6 +946,9 @@ function resetForm() {
   document.getElementById('f_spad_equiv').style.color='var(--forest)';
   document.getElementById('spadConvFormula').textContent='';
   spadManuallyEdited=false;
+  // Re-generate measurement ID for next entry; keep device ID
+  if (myDevice) document.getElementById('f_device').value = myDevice;
+  genMeasId();
   document.getElementById('spadWarn').className='spad-warn';
   document.getElementById('aiResult').classList.remove('show');
   document.getElementById('aiResultContent').innerHTML='';
@@ -1042,6 +1081,27 @@ function switchTab(tab,btn){
 
 // ── SETUP ─────────────────────────────────────────────────────────────────
 function saveName(){ const n=document.getElementById('userName').value.trim(); if(!n){toast('Enter your name','e');return;} userName=n; localStorage.setItem('spad_user',n); document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=n; toast('Name saved ✓','s'); }
+
+function saveDevice(){
+  const d=document.getElementById('myDevice').value.trim();
+  if(!d){toast('Enter your device ID','e');return;}
+  myDevice=d;
+  localStorage.setItem('spad_my_device',d);
+  document.getElementById('deviceSaved').style.display='flex';
+  document.getElementById('f_device').value=d;
+  toast('Device saved ✓','s');
+}
+
+function genMeasId(){
+  // Format: [DeviceID]-[YYYYMMDD]-[counter padded to 3]
+  const dev  = (myDevice || document.getElementById('f_device').value || 'DEV').replace(/[^a-zA-Z0-9\-]/g,'');
+  const date = (document.getElementById('f_date').value || new Date().toISOString().split('T')[0]).replace(/-/g,'');
+  measCounter++;
+  localStorage.setItem('spad_meas_counter', measCounter);
+  const id = `${dev}-${date}-${String(measCounter).padStart(3,'0')}`;
+  document.getElementById('f_meas_id').value = id;
+  toast('Measurement ID generated','s');
+}
 function saveApiKey(){ const k=document.getElementById('apiKey').value.trim(); if(!k.startsWith('sk-ant-')){toast('Invalid API key format','e');return;} apiKey=k; localStorage.setItem('spad_api_key',k); document.getElementById('apiKeySaved').style.display='flex'; document.getElementById('apiWarn').classList.remove('show'); toast('API key saved ✓','s'); }
 function saveUrl(){ const u=document.getElementById('gasUrl').value.trim(); if(!u.startsWith('https://script.google.com')){toast('Paste a valid Apps Script URL','e');return;} gasUrl=u; localStorage.setItem('spad_gas_url',u); document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); toast('Connected ✓','s'); }
 function copyScript(){ navigator.clipboard.writeText(document.getElementById('scriptCode').textContent).then(()=>toast('Script copied ✓','s')).catch(()=>toast('Select and copy manually','e')); }
