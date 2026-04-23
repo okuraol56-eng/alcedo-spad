@@ -375,7 +375,7 @@
   </div>
   <div class="row c2" style="margin-top:0">
     <div class="f"><label>Variety / Hybrid <span class="r">*</span></label><input type="text" id="f_variety" class="m" placeholder="e.g. Pioneer P9903"></div>
-    <div class="f"><label>FAO Number</label><input type="number" id="f_fao" class="o" placeholder="e.g. 380" min="100" max="900"></div>
+    <div class="f" id="fao_field" style="display:none"><label>FAO Number <span class="r">*</span></label><input type="number" id="f_fao" class="m" placeholder="e.g. 380" min="100" max="900"></div>
   </div>
   <div class="row"><div class="f"><label>Leaf Position <span class="r">*</span></label>
     <select id="f_leaf_pos" class="m">
@@ -388,17 +388,32 @@
   <div style="font-size:11px;color:var(--teal);padding:6px 10px;background:var(--teal-bg);border-radius:6px;margin-bottom:10px;">
     Enter the 5-plant average shown in the atLEAF app.
   </div>
+  <!-- atLEAF input -->
   <div class="atleaf-wrap">
     <div class="atleaf-lbl">atLEAF avg</div>
     <input type="number" class="atleaf-inp" id="f_atleaf" min="0" max="99.9" step="0.1" placeholder="—" oninput="checkVal()">
     <div class="atleaf-unit">atLEAF units</div>
   </div>
+  <!-- SPAD equivalent (auto-calculated, editable) -->
+  <div class="atleaf-wrap" style="background:var(--gray-light);border-color:var(--gray);margin-top:6px;" id="spadConvBox">
+    <div class="atleaf-lbl" style="color:var(--gray);">≈ SPAD equiv</div>
+    <input type="number" class="atleaf-inp" id="f_spad_equiv" min="0" max="100" step="0.1" placeholder="auto"
+      style="color:var(--forest);border-bottom-color:var(--gray);"
+      oninput="onSpadManualEdit()">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:80px;">
+      <div class="atleaf-unit" style="color:var(--gray);">SPAD units</div>
+      <div id="spadConvFormula" style="font-size:9px;color:var(--gray);font-style:italic;text-align:right;line-height:1.3;"></div>
+    </div>
+  </div>
   <div class="spad-warn" id="spadWarn"></div>
 
-  <div class="sec">N FERTILISER HISTORY <span class="badge badge-m">MUST</span></div>
+  <div class="sec" style="background:#1A5C4A">N FERTILISER HISTORY <span class="badge" style="background:#6EE7B7;color:#064E3B">RECOMMENDED</span></div>
+  <div style="font-size:11px;color:#1A5C4A;padding:5px 10px;background:#D1FAE5;border-radius:6px;margin-bottom:8px;">
+    Fill if available — strongly improves AI interpretation quality.
+  </div>
   <div class="row c2">
-    <div class="f"><label>N Applied (kg N/ha) <span class="r">*</span></label><input type="number" id="f_n_rate" class="m" min="0" step="1" placeholder="120"></div>
-    <div class="f"><label>N Application Date</label><input type="date" id="f_n_date" class="m"></div>
+    <div class="f"><label>N Applied (kg N/ha)</label><input type="number" id="f_n_rate" class="o" min="0" step="1" placeholder="120"></div>
+    <div class="f"><label>N Application Date</label><input type="date" id="f_n_date" class="o"></div>
   </div>
 
   <div class="divider"></div>
@@ -491,7 +506,7 @@
         "Date","Time","GPS Lat","GPS Lon",
         "Rainfall 14d (mm)","Device ID","Measurement ID",
         "Crop","Variety","FAO No","Growth Stage","Leaf Position",
-        "atLEAF Avg","N Rate (kg/ha)","N Appl Date",
+        "atLEAF Avg","SPAD Equiv","N Rate (kg/ha)","N Appl Date",
         "Soil Type","Prev Crop","Visual Obs","AI Interpretation"
       ]);
     }
@@ -501,7 +516,7 @@
       d.sales_rep, d.farmer, d.date, d.time, d.lat, d.lon,
       d.rainfall, d.device_id, d.meas_id,
       d.crop, d.variety, d.fao, d.stage, d.leaf_pos,
-      d.atleaf_avg, d.n_rate, d.n_date,
+      d.atleaf_avg, d.spad_equiv, d.n_rate, d.n_date,
       d.soil, d.prev_crop, d.visual, d.ai_interpretation
     ]);
     return ContentService
@@ -550,7 +565,7 @@ DIFFERENTIAL DIAGNOSIS:
 4. DISEASE: Irregular spotting/lesions.
 5. VARIETY BASELINE: Some hybrids naturally lighter green.
 
-RESPOND IN EXACTLY THIS JSON FORMAT — no markdown, no extra text:
+RESPOND IN EXACTLY THIS JSON FORMAT — no markdown, no extra text. ALL text values in the JSON must be written in Romanian language:
 {
   "conclusion": "One sentence: N deficient / borderline / sufficient, and why.",
   "conclusion_level": "low|borderline|ok",
@@ -594,6 +609,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   document.getElementById('f_date').value = now.toISOString().split('T')[0];
   document.getElementById('f_time').value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  // Re-fetch rainfall when visit date changes
+  document.getElementById('f_date').addEventListener('change', () => {
+    if (gpsLat && gpsLon) fetchRainfall(gpsLat, gpsLon);
+  });
   if (userName) { document.getElementById('userName').value=userName; document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=userName; }
   if (gasUrl)   { document.getElementById('gasUrl').value=gasUrl; document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); }
   if (apiKey)   { document.getElementById('apiKey').value=apiKey; document.getElementById('apiKeySaved').style.display='flex'; }
@@ -622,15 +641,37 @@ function setBar(id, state, icon, text, hasRetry) {
 async function fetchRainfall(lat, lon) {
   setBar('weatherBar','wait','⏳','Fetching 14-day rainfall...',false);
   try {
-    const end=new Date(), start=new Date(); start.setDate(start.getDate()-14);
+    // Use visit date (f_date) as end date, not today
+    const visitDateVal = document.getElementById('f_date').value;
+    const end = visitDateVal ? new Date(visitDateVal) : new Date();
+    // Cap end date at today (can't fetch future data)
+    if (end > new Date()) end.setTime(new Date().getTime());
+    const start = new Date(end); start.setDate(start.getDate()-14);
     const fmt=d=>d.toISOString().split('T')[0];
     const data=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum&start_date=${fmt(start)}&end_date=${fmt(end)}&timezone=auto`)).json();
     if (data.daily?.precipitation_sum) {
       rainfallMm = data.daily.precipitation_sum.filter(v=>v!==null).reduce((a,b)=>a+b,0).toFixed(1);
       const mm=parseFloat(rainfallMm);
-      setBar('weatherBar','ok', mm<20?'🔴':mm>60?'💧':'✅', `Rainfall last 14d: ${rainfallMm} mm${mm<20?' — LOW (water stress risk)':mm>60?' — HIGH (N leaching risk)':' — normal'}`, false);
+      setBar('weatherBar','ok', mm<20?'🔴':mm>60?'💧':'✅', `Rainfall 14d before ${fmt(end)}: ${rainfallMm} mm${mm<20?' — LOW (water stress risk)':mm>60?' — HIGH (N leaching risk)':' — normal'}`, false);
     } else throw new Error();
   } catch { rainfallMm=null; setBar('weatherBar','neutral','⚠️','Rainfall data unavailable',false); }
+}
+
+// ── SPAD CONVERSION FORMULAS (Zhu, Tremblay & Liang 2011) ────────────────
+// SPAD = M * atLEAF + O   per crop
+const SPAD_CONV = {
+  'Maize':     { m: 0.94, o: -7.1,  r2: 0.92, label: 'Corn: 0.94X−7.1' },
+  'Wheat':     { m: 0.93, o: -7.6,  r2: 0.78, label: 'Wheat: 0.93X−7.6' },
+  'Rapeseed':  { m: 1.14, o: -16.6, r2: 0.86, label: 'Canola: 1.14X−16.6' },
+  'Sunflower': null,  // no validated equation — use atLEAF directly
+  'Other':     { m: 0.99, o: -10.1, r2: 0.90, label: 'All species: 0.99X−10.1' },
+};
+
+function getSPADEquiv(atleafVal, crop) {
+  const conv = SPAD_CONV[crop];
+  if (!conv || isNaN(atleafVal)) return null;
+  const spad = conv.m * atleafVal + conv.o;
+  return { spad: Math.round(spad * 10) / 10, label: conv.label, r2: conv.r2 };
 }
 
 // ── STAGES ────────────────────────────────────────────────────────────────
@@ -638,17 +679,74 @@ function updateStages() {
   const crop=document.getElementById('f_crop').value, sel=document.getElementById('f_stage');
   sel.innerHTML='<option value="">Select...</option>';
   (STAGES[crop]||[]).forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o);});
+  // FAO number: Maize only
+  const faoField = document.getElementById('fao_field');
+  faoField.style.display = crop==='Maize' ? 'flex' : 'none';
+  if (crop!=='Maize') document.getElementById('f_fao').value='';
   checkVal();
 }
 
+let spadManuallyEdited = false;
+
 function checkVal() {
-  const val=parseFloat(document.getElementById('f_atleaf').value);
-  const crop=document.getElementById('f_crop').value, stage=document.getElementById('f_stage').value;
-  const inp=document.getElementById('f_atleaf'), warn=document.getElementById('spadWarn');
-  if (isNaN(val)) { inp.className='atleaf-inp'; warn.className='spad-warn'; return; }
-  if (val<40 && crop==='Maize' && stage==='V6') { inp.className='atleaf-inp low'; warn.className='spad-warn low'; warn.innerHTML='⚠️  Below V6 diagnostic threshold — N response likely. Rule out water stress & S deficiency first.'; }
-  else if (val<32) { inp.className='atleaf-inp low'; warn.className='spad-warn low'; warn.innerHTML='⚠️  Very low reading — investigate N, S, water stress, and disease.'; }
-  else { inp.className='atleaf-inp'; warn.className='spad-warn ok'; warn.innerHTML='✓  Reading recorded'; }
+  const val   = parseFloat(document.getElementById('f_atleaf').value);
+  const crop  = document.getElementById('f_crop').value;
+  const stage = document.getElementById('f_stage').value;
+  const inp   = document.getElementById('f_atleaf');
+  const warn  = document.getElementById('spadWarn');
+  const spadInp     = document.getElementById('f_spad_equiv');
+  const convFormula = document.getElementById('spadConvFormula');
+
+  if (isNaN(val)) {
+    inp.className = 'atleaf-inp';
+    warn.className = 'spad-warn';
+    if (!spadManuallyEdited) { spadInp.value = ''; convFormula.textContent = ''; }
+    return;
+  }
+
+  // Auto-fill SPAD equivalent (only if not manually edited)
+  const conv = getSPADEquiv(val, crop);
+  if (!spadManuallyEdited) {
+    if (conv) {
+      spadInp.value = conv.spad;
+      spadInp.style.color = conv.spad < 43.4 ? 'var(--amber)' : 'var(--teal)';
+      convFormula.textContent = conv.label + ' (R²=' + conv.r2 + ', Zhu et al. 2011)';
+    } else {
+      // Sunflower — no equation
+      spadInp.value = '';
+      spadInp.style.color = 'var(--gray)';
+      convFormula.textContent = 'No validated equation for sunflower';
+    }
+  }
+
+  // Threshold warnings
+  // Maize V6: atLEAF 53.7 ≈ SPAD 43.4 (Piekkielek & Fox 1992, via Zhu et al. 2011)
+  const isLowMaizeV6 = crop === 'Maize' && stage === 'V6' && val < 53.7;
+  const isVeryLow    = val < 40;
+
+  if (isLowMaizeV6) {
+    inp.className  = 'atleaf-inp low';
+    warn.className = 'spad-warn low';
+    warn.innerHTML = '⚠️  Below V6 diagnostic threshold (atLEAF 53.7 ≈ SPAD 43.4) — N response likely.<br>Rule out water stress & S deficiency first.';
+  } else if (isVeryLow) {
+    inp.className  = 'atleaf-inp low';
+    warn.className = 'spad-warn low';
+    warn.innerHTML = '⚠️  Very low reading — investigate N, S, water stress, and disease.';
+  } else {
+    inp.className  = 'atleaf-inp';
+    warn.className = 'spad-warn ok';
+    warn.innerHTML = '✓  Reading recorded';
+  }
+}
+
+function onSpadManualEdit() {
+  spadManuallyEdited = true;
+  const v = parseFloat(document.getElementById('f_spad_equiv').value);
+  const inp = document.getElementById('f_spad_equiv');
+  if (!isNaN(v)) {
+    inp.style.color = v < 43.4 ? 'var(--amber)' : 'var(--teal)';
+    document.getElementById('spadConvFormula').textContent = 'Manually entered';
+  }
 }
 
 // ── AI ────────────────────────────────────────────────────────────────────
@@ -657,13 +755,20 @@ async function getAI() {
   const atleaf=document.getElementById('f_atleaf').value, crop=document.getElementById('f_crop').value, stage=document.getElementById('f_stage').value;
   if (!atleaf||!crop||!stage) { toast('Fill Crop, Stage, and atLEAF value first','e'); return; }
 
+  const spadEquivVal = document.getElementById('f_spad_equiv').value;
+  const spadEquivNote = spadManuallyEdited ? '(manually entered)' : '(auto-converted via Zhu et al. 2011)';
+  const spadLine = spadEquivVal
+    ? `SPAD equivalent: ${spadEquivVal} SPAD units ${spadEquivNote}`
+    : `SPAD equivalent: not available (no validated conversion for ${crop})`;
+
   const msg = `Farmer: ${document.getElementById('f_farmer').value||'not specified'}
 Date: ${document.getElementById('f_date').value}
 GPS: ${gpsLat?gpsLat+', '+gpsLon:'unavailable'}
-Rainfall last 14 days: ${rainfallMm?rainfallMm+' mm':'unavailable'}
+Rainfall last 14 days before visit date: ${rainfallMm?rainfallMm+' mm':'unavailable'}
 Crop: ${crop} | Variety: ${document.getElementById('f_variety').value||'not specified'} | FAO: ${document.getElementById('f_fao').value||'not specified'}
 Growth Stage: ${stage} | Leaf Position: ${document.getElementById('f_leaf_pos').value||'not specified'}
-atLEAF Average (5-plant): ${atleaf} units
+atLEAF Average (5-plant mean): ${atleaf} atLEAF units
+${spadLine}
 N Applied: ${document.getElementById('f_n_rate').value||'not specified'} kg N/ha on ${document.getElementById('f_n_date').value||'unknown date'}
 Soil Type: ${document.getElementById('f_soil').value||'not specified'} | Previous Crop: ${document.getElementById('f_prev_crop').value||'not specified'}
 Visual Observations: ${document.getElementById('f_visual').value||'none'}`;
@@ -725,8 +830,10 @@ function renderAI(p, container) {
 
 // ── CONFIRM ───────────────────────────────────────────────────────────────
 function showConfirm() {
-  const req={f_farmer:'Farmer Name',f_date:'Date',f_time:'Time',f_device:'Device ID',f_meas_id:'Measurement ID',f_crop:'Crop',f_stage:'Growth Stage',f_variety:'Variety',f_leaf_pos:'Leaf Position',f_n_rate:'N Rate'};
+  const req={f_farmer:'Farmer Name',f_date:'Date',f_time:'Time',f_device:'Device ID',f_meas_id:'Measurement ID',f_crop:'Crop',f_stage:'Growth Stage',f_variety:'Variety',f_leaf_pos:'Leaf Position'};
   for (const [id,label] of Object.entries(req)) { if(!document.getElementById(id).value.trim()){toast(label+' is required','e');return;} }
+  // FAO required for Maize
+  if (document.getElementById('f_crop').value==='Maize' && !document.getElementById('f_fao').value) { toast('FAO Number is required for Maize','e'); return; }
   if (!document.getElementById('f_atleaf').value) { toast('Enter the atLEAF average value','e'); return; }
   const avg=parseFloat(document.getElementById('f_atleaf').value), low=avg<40;
   document.getElementById('confirmRows').innerHTML = [
@@ -734,7 +841,7 @@ function showConfirm() {
     ['Date / Time', document.getElementById('f_date').value+' '+document.getElementById('f_time').value],
     ['Crop',      document.getElementById('f_crop').value+' — '+document.getElementById('f_stage').value],
     ['Variety',   document.getElementById('f_variety').value+(document.getElementById('f_fao').value?' (FAO '+document.getElementById('f_fao').value+')':'')],
-    ['N Applied', document.getElementById('f_n_rate').value+' kg N/ha'],
+    ['N Applied', document.getElementById('f_n_rate').value ? document.getElementById('f_n_rate').value+' kg N/ha' : 'not specified'],
     ['Rainfall',  rainfallMm?rainfallMm+' mm (last 14d)':'not available'],
     ['AI done',   lastAIParsed?'✓ Yes':'— Not yet'],
   ].map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('')
@@ -755,6 +862,7 @@ async function doSubmit() {
     fao:document.getElementById('f_fao').value, stage:document.getElementById('f_stage').value,
     leaf_pos:document.getElementById('f_leaf_pos').value,
     atleaf_avg:document.getElementById('f_atleaf').value,
+    spad_equiv:document.getElementById('f_spad_equiv').value,
     n_rate:document.getElementById('f_n_rate').value, n_date:document.getElementById('f_n_date').value,
     soil:document.getElementById('f_soil').value, prev_crop:document.getElementById('f_prev_crop').value,
     visual:document.getElementById('f_visual').value.trim(),
@@ -777,7 +885,13 @@ function resetForm() {
   ['f_farmer','f_meas_id','f_variety','f_fao','f_atleaf','f_n_rate','f_n_date','f_visual'].forEach(id=>document.getElementById(id).value='');
   ['f_crop','f_stage','f_soil','f_prev_crop','f_leaf_pos'].forEach(id=>document.getElementById(id).selectedIndex=0);
   document.getElementById('f_stage').innerHTML='<option value="">Select crop first</option>';
+  document.getElementById('fao_field').style.display='none';
+  document.getElementById('f_fao').value='';
   document.getElementById('f_atleaf').className='atleaf-inp';
+  document.getElementById('f_spad_equiv').value='';
+  document.getElementById('f_spad_equiv').style.color='var(--forest)';
+  document.getElementById('spadConvFormula').textContent='';
+  spadManuallyEdited=false;
   document.getElementById('spadWarn').className='spad-warn';
   document.getElementById('aiResult').classList.remove('show');
   document.getElementById('aiResultContent').innerHTML='';
@@ -807,6 +921,8 @@ function openDetail(idx) {
     ['Rainfall 14d', r.rainfall ? r.rainfall+' mm' : '—'],
     ['Soil',        r.soil||'—'],
     ['Prev crop',   r.prev_crop||'—'],
+    ['atLEAF Avg',  r.atleaf_avg + ' units'],
+    ['SPAD Equiv',  r.spad_equiv ? r.spad_equiv + ' SPAD' : '—'],
     ['Device',      r.device_id + ' · #' + r.meas_id],
   ].map(([k,v])=>`<div class="detail-cell"><div class="detail-cell-label">${k}</div><div class="detail-cell-val">${v}</div></div>`).join('');
 
@@ -879,7 +995,7 @@ function renderRecords() {
 
 function exportCSV() {
   if(!records.length){toast('No records to export','e');return;}
-  const H=['ID','Sales Rep','Farmer','Date','Time','GPS Lat','GPS Lon','Rainfall 14d','Device ID','Measurement ID','Crop','Variety','FAO','Stage','Leaf Pos','atLEAF Avg','N Rate','N Date','Soil','Prev Crop','Visual','AI Interpretation','Synced'];
+  const H=['ID','Sales Rep','Farmer','Date','Time','GPS Lat','GPS Lon','Rainfall 14d','Device ID','Measurement ID','Crop','Variety','FAO','Stage','Leaf Pos','atLEAF Avg','SPAD Equiv','N Rate','N Date','Soil','Prev Crop','Visual','AI Interpretation','Synced'];
   const rows=records.map(r=>[r.id,r.sales_rep,`"${r.farmer}"`,r.date,r.time,r.lat,r.lon,r.rainfall,r.device_id,r.meas_id,r.crop,`"${r.variety}"`,r.fao,r.stage,r.leaf_pos,r.atleaf_avg,r.n_rate,r.n_date,r.soil,r.prev_crop,`"${r.visual}"`,`"${(r.ai_interpretation||'').replace(/"/g,"'")}"`,r.synced?'yes':'no']);
   const csv=[H,...rows].map(r=>r.join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='SPAD_'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
