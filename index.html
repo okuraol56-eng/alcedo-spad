@@ -6,8 +6,11 @@
 <title>SPAD Field App — Alcedo</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -1235,7 +1238,6 @@ function renderRecordsMap() {
     return;
   }
   if (mapDiv.firstChild && mapDiv.firstChild.tagName !== 'DIV') {
-    // Wrong content, clear
     mapDiv.innerHTML = '';
   }
 
@@ -1250,10 +1252,37 @@ function renderRecordsMap() {
     attribution: '© OpenStreetMap'
   }).addTo(recordsMapInstance);
 
+  // Create cluster group with custom icon showing count
+  const clusterGroup = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    spiderfyOnMaxZoom: true,
+    maxClusterRadius: 40,
+    iconCreateFunction: cluster => {
+      const children = cluster.getAllChildMarkers();
+      const count = children.length;
+      // If any child is low (flagged), colour the cluster amber
+      const anyLow = children.some(m => m.options._isLow);
+      const bg = anyLow ? '#D4841A' : '#1A6B5C';
+      return L.divIcon({
+        html: `<div style="
+          background:${bg};
+          color:#fff;
+          width:36px;height:36px;
+          border-radius:50%;
+          display:flex;align-items:center;justify-content:center;
+          font-family:'DM Mono',monospace;font-weight:700;font-size:14px;
+          border:3px solid #fff;
+          box-shadow:0 2px 6px rgba(0,0,0,0.3);
+        ">${count}</div>`,
+        className: 'spad-cluster-icon',
+        iconSize: [36, 36]
+      });
+    }
+  });
+
   const markers = [];
-  geo.forEach((r, idx) => {
+  geo.forEach((r) => {
     const lat = parseFloat(r.lat), lon = parseFloat(r.lon);
-    // Determine colour: SPAD-equiv if exists, else atLEAF
     const spadVal   = parseFloat(r.spad_equiv);
     const atleafVal = parseFloat(r.atleaf_avg);
     const isLow = (!isNaN(spadVal) && spadVal < 43.4) ||
@@ -1262,14 +1291,13 @@ function renderRecordsMap() {
 
     const marker = L.circleMarker([lat, lon], {
       radius: 9, color: '#fff', weight: 2,
-      fillColor: color, fillOpacity: 0.9
-    }).addTo(recordsMapInstance);
+      fillColor: color, fillOpacity: 0.9,
+      _isLow: isLow
+    });
 
     const displayVal = !isNaN(spadVal)
       ? `SPAD ${spadVal.toFixed(1)}`
       : (!isNaN(atleafVal) ? `atLEAF ${atleafVal.toFixed(1)}` : '—');
-
-    // Find original index for openDetail (records array order)
     const origIdx = records.indexOf(r);
 
     marker.bindPopup(`
@@ -1282,8 +1310,11 @@ function renderRecordsMap() {
       <button onclick="openDetail(${origIdx})"
         style="margin-top:4px;margin-left:4px;padding:4px 10px;font-size:11px;border-radius:6px;background:#2C5F2D;color:#fff;border:none;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">View details</button>
     `);
+    clusterGroup.addLayer(marker);
     markers.push(marker);
   });
+
+  recordsMapInstance.addLayer(clusterGroup);
 
   // Fit bounds to show all markers
   if (markers.length === 1) {
