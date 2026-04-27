@@ -693,7 +693,20 @@ const STAGES = {
   'Other':     ['Vegetative','Reproductive','Other'],
 };
 
-let records  = JSON.parse(localStorage.getItem('spad_v12') || '[]');
+// ── STORAGE KEY (single source of truth) ──────────────────────────────────
+const STORAGE_KEY = 'spad_v6';
+
+// ── ONE-TIME MIGRATION from old key 'spad_v12' ────────────────────────────
+(function migrateOldKey() {
+  const oldData = localStorage.getItem('spad_v12');
+  if (oldData && !localStorage.getItem(STORAGE_KEY)) {
+    localStorage.setItem(STORAGE_KEY, oldData);
+    localStorage.removeItem('spad_v12');
+    console.log('Migrated records from spad_v12 → ' + STORAGE_KEY);
+  }
+})();
+
+let records  = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 let gasUrl   = localStorage.getItem('spad_gas_url')   || '';
 let userName = localStorage.getItem('spad_user')      || '';
 let apiKey   = localStorage.getItem('spad_api_key')   || '';
@@ -1000,10 +1013,10 @@ async function doSubmit() {
     visual:document.getElementById('f_visual').value.trim(),
     ai_interpretation:lastAIResult, synced:false,
   };
-  records.unshift(r); localStorage.setItem('spad_v6',JSON.stringify(records));
+  records.unshift(r); localStorage.setItem(STORAGE_KEY,JSON.stringify(records));
   const btn=document.getElementById('btnSubmit'); btn.disabled=true; btn.textContent='Saving...';
   if (gasUrl) {
-    try { await fetch(gasUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)}); r.synced=true; localStorage.setItem('spad_v6',JSON.stringify(records)); toast('Saved & synced to Sheets ✓','s'); }
+    try { await fetch(gasUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)}); r.synced=true; localStorage.setItem(STORAGE_KEY,JSON.stringify(records)); toast('Saved & synced to Sheets ✓','s'); }
     catch { toast('Saved locally (offline)','e'); }
   } else { toast('Saved locally ✓','s'); }
   btn.disabled=false; btn.textContent='Save Record';
@@ -1182,7 +1195,7 @@ function renderRecords() {
 function exportCSV() {
   if(!records.length){toast('No records to export','e');return;}
   const H=['ID','Sales Rep','Farmer','Date','Time','GPS Lat','GPS Lon','Rainfall 14d','Device ID','Measurement ID','Crop','Variety','FAO','Stage','Leaf Pos','atLEAF Avg','SPAD Equiv','N Rate','N Date','Soil','Prev Crop','Visual','AI Interpretation','Synced'];
-  const rows=records.map(r=>[r.id,r.sales_rep,`"${r.farmer}"`,r.date,r.time,r.lat,r.lon,r.rainfall,r.device_id,r.meas_id,r.crop,`"${r.variety}"`,r.fao,r.stage,r.leaf_pos,r.atleaf_avg,r.n_rate,r.n_date,r.soil,r.prev_crop,`"${r.visual}"`,`"${(r.ai_interpretation||'').replace(/"/g,"'")}"`,r.synced?'yes':'no']);
+  const rows=records.map(r=>[r.id,r.sales_rep,`"${r.farmer}"`,r.date,r.time,r.lat,r.lon,r.rainfall,r.device_id,r.meas_id,r.crop,`"${r.variety}"`,r.fao,r.stage,r.leaf_pos,r.atleaf_avg,r.spad_equiv,r.n_rate,r.n_date,r.soil,r.prev_crop,`"${r.visual}"`,`"${(r.ai_interpretation||'').replace(/"/g,"'")}"`,r.synced?'yes':'no']);
   const csv=[H,...rows].map(r=>r.join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='SPAD_'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
   toast('CSV exported ✓','s');
