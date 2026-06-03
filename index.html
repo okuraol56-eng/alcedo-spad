@@ -93,7 +93,7 @@
 
   .divider { height: 1px; background: var(--border); margin: 4px 0 14px; }
 
-  /* ═══ CONFIRM MODAL ═══ */
+  /* CONFIRM MODAL */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
     z-index: 9000; display: none; align-items: flex-end; justify-content: center;
@@ -117,7 +117,7 @@
   .btn-cancel  { padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--gray); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .btn-confirm { padding: 14px; border: none; border-radius: 10px; background: var(--green); color: var(--white); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-  /* ═══ DETAIL MODAL ═══ */
+  /* DETAIL MODAL */
   .detail-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.55);
     z-index: 10000; display: none; align-items: flex-end; justify-content: center;
@@ -173,7 +173,7 @@
   .ai-action { background: var(--teal-bg); border: 1.5px solid var(--teal); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
   .ai-action-label { font-size: 10px; font-weight: 700; color: var(--teal); letter-spacing: 0.08em; margin-bottom: 6px; }
   .ai-action-item  { font-size: 12px; color: var(--teal); line-height: 1.7; display: flex; gap: 6px; }
-  .ai-action-item::before { content: "→"; font-weight: 700; flex-shrink: 0; }
+  .ai-action-item::before { content: "\2192"; font-weight: 700; flex-shrink: 0; }
 
   .ai-detail { margin-bottom: 10px; }
   .ai-detail-label { font-size: 10px; font-weight: 700; color: var(--gray); letter-spacing: 0.07em; margin-bottom: 4px; }
@@ -288,7 +288,7 @@
   .toast.show { display: block; animation: tUp 0.3s ease; }
   @keyframes tUp { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
-  /* ═══ MAP STYLES ═══ */
+  /* MAP STYLES */
   .mini-map {
     width: 100%; height: 140px; border-radius: 10px;
     border: 1.5px solid var(--border); margin-bottom: 10px;
@@ -352,8 +352,8 @@
     <div class="modal-title">Confirm before submitting</div>
     <div id="confirmRows"></div>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeConfirm()">← Edit</button>
-      <button class="btn-confirm" onclick="doSubmit()">Save Record ✓</button>
+      <button class="btn-cancel" onclick="closeConfirm()">&larr; Edit</button>
+      <button class="btn-confirm" onclick="doSubmit()">Save Record &#10003;</button>
     </div>
   </div>
 </div>
@@ -385,7 +385,7 @@
     <div class="header-dot"></div>
     <div>
       <div class="header-title">SPAD Field App — Alcedo</div>
-      <div class="header-user" id="headerUser">Set your name in Setup ⚙️</div>
+      <div class="header-user" id="headerUser">Set your name in Setup &#9881;&#65039;</div>
     </div>
   </div>
   <div class="sync-pill">
@@ -395,28 +395,27 @@
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('entry',this)">📋 Entry</button>
-  <button class="tab" onclick="switchTab('records',this)">📊 Records</button>
-  <button class="tab" onclick="switchTab('setup',this)">⚙️ Setup</button>
+  <button class="tab active" onclick="switchTab('entry',this)">&#128203; Entry</button>
+  <button class="tab" onclick="switchTab('records',this)">&#128202; Records</button>
+  <button class="tab" onclick="switchTab('setup',this)">&#9881;&#65039; Setup</button>
 </div>
 
-<!-- ═══════ ENTRY ═══════ -->
+<!-- ENTRY -->
 <div class="panel active" id="panel-entry">
 <div class="form-wrap">
 
   <div class="info-bar wait" id="gpsBar">
-    <span id="gpsIcon">📡</span><span id="gpsText">Acquiring GPS...</span>
+    <span id="gpsIcon">&#128225;</span><span id="gpsText">Acquiring GPS...</span>
     <button class="btn-sm" onclick="getGPS()">Retry</button>
   </div>
   <div class="info-bar neutral" id="weatherBar">
-    <span>🌧️</span><span id="weatherText">Rainfall loads after GPS...</span>
+    <span>&#127783;&#65039;</span><span id="weatherText">Rainfall loads after GPS...</span>
   </div>
 
-  <!-- Mini map + Google Maps button (shown once GPS acquired) -->
   <div class="mini-map hidden" id="miniMap"></div>
   <div id="miniMapActions" style="display:none;margin-bottom:12px;text-align:center;">
     <a href="#" id="gmapsLinkEntry" target="_blank" class="btn-gmaps">
-      📍 Open in Google Maps
+      &#128205; Open in Google Maps
     </a>
   </div>
 
@@ -443,12 +442,20 @@
     </div>
   </div>
 
-  <div class="sec">CROP & STAGE <span class="badge badge-m">MUST</span></div>
+  <div class="sec">CROP &amp; STAGE <span class="badge badge-m">MUST</span></div>
   <div class="row c2">
     <div class="f"><label>Crop <span class="r">*</span></label>
       <select id="f_crop" class="m" onchange="updateStages()">
-        <option value="">Select...</option><option>Maize</option><option>Sunflower</option>
-        <option>Wheat</option><option>Rapeseed</option><option>Other</option>
+        <option value="">Select...</option>
+        <option>Maize</option>
+        <option>Wheat</option>
+        <option>Barley</option>
+        <option>Sunflower</option>
+        <option>Rapeseed</option>
+        <option>Soybean</option>
+        <option>Pea</option>
+        <option>Sugar beet</option>
+        <option>Other</option>
       </select></div>
     <div class="f"><label>Growth Stage <span class="r">*</span></label>
       <select id="f_stage" class="m" onchange="checkVal()"><option value="">Select crop first</option></select></div>
@@ -468,13 +475,11 @@
   <div style="font-size:11px;color:var(--teal);padding:6px 10px;background:var(--teal-bg);border-radius:6px;margin-bottom:10px;">
     Enter atLEAF value (5-plant avg from app) OR direct SPAD value. At least one is required.
   </div>
-  <!-- atLEAF input -->
   <div class="atleaf-wrap">
     <div class="atleaf-lbl">atLEAF avg</div>
     <input type="number" class="atleaf-inp" id="f_atleaf" min="0" max="99.9" step="0.1" placeholder="—" oninput="checkVal()">
     <div class="atleaf-unit">atLEAF units</div>
   </div>
-  <!-- SPAD equivalent (auto-calculated, or direct SPAD entry) -->
   <div class="atleaf-wrap" style="background:var(--gray-light);border-color:var(--gray);margin-top:6px;" id="spadConvBox">
     <div class="atleaf-lbl" style="color:var(--gray);">SPAD value</div>
     <input type="number" class="atleaf-inp" id="f_spad_equiv" min="0" max="100" step="0.1" placeholder="auto / direct"
@@ -507,8 +512,16 @@
       </select></div>
     <div class="f"><label>Previous Crop</label>
       <select id="f_prev_crop" class="o">
-        <option value="">—</option><option>Wheat</option><option>Sunflower</option>
-        <option>Maize</option><option>Rapeseed</option><option>Soybean</option><option>Other</option>
+        <option value="">—</option>
+        <option>Wheat</option>
+        <option>Barley</option>
+        <option>Maize</option>
+        <option>Sunflower</option>
+        <option>Rapeseed</option>
+        <option>Soybean</option>
+        <option>Pea</option>
+        <option>Sugar beet</option>
+        <option>Other</option>
       </select></div>
   </div>
   <div class="row" style="margin-top:0"><div class="f"><label>Visual Observations</label>
@@ -518,20 +531,20 @@
   <div class="divider"></div>
 
   <div class="sec ai">AI INTERPRETATION <span class="badge badge-ai">CLAUDE</span></div>
-  <div class="api-warn" id="apiWarn">⚠️ Claude API key not set. Go to Setup tab to add your key.</div>
+  <div class="api-warn" id="apiWarn">&#9888;&#65039; Claude API key not set. Go to Setup tab to add your key.</div>
   <div class="ai-result" id="aiResult">
-    <div class="ai-result-header">✦ AI INTERPRETATION<span class="ai-timestamp" id="aiTimestamp"></span></div>
+    <div class="ai-result-header">&#10022; AI INTERPRETATION<span class="ai-timestamp" id="aiTimestamp"></span></div>
     <div id="aiResultContent"></div>
   </div>
 
 </div>
 <div class="submit-wrap">
-  <button class="btn-ai" id="btnAI" onclick="getAI()">✦ Interpret with AI</button>
+  <button class="btn-ai" id="btnAI" onclick="getAI()">&#10022; Interpret with AI</button>
   <button class="btn-submit" id="btnSubmit" onclick="showConfirm()">Save Record</button>
 </div>
 </div>
 
-<!-- ═══════ RECORDS ═══════ -->
+<!-- RECORDS -->
 <div class="panel" id="panel-records">
 <div class="rec-wrap">
   <div class="rec-head">
@@ -548,50 +561,50 @@
 </div>
 </div>
 
-<!-- ═══════ SETUP ═══════ -->
+<!-- SETUP -->
 <div class="panel" id="panel-setup">
 <div class="set-wrap">
   <div class="set-card">
     <div class="set-title">Your Profile</div>
     <div class="step">
-      <div class="step-n">👤</div>
+      <div class="step-n">&#128100;</div>
       <div class="step-c">
         <div class="step-h">Your name (sales rep)</div>
         <div class="step-d">Set once. Attached to every record automatically.</div>
         <div class="inp-row"><input type="text" class="url-inp" id="userName" placeholder="e.g. ION_POPESCU"><button class="btn-save" onclick="saveName()">Save</button></div>
-        <div class="ok-badge" id="nameSaved">✅ Saved</div>
+        <div class="ok-badge" id="nameSaved">&#9989; Saved</div>
       </div>
     </div>
     <div class="step" style="margin-bottom:0">
-      <div class="step-n">📟</div>
+      <div class="step-n">&#128223;</div>
       <div class="step-c">
         <div class="step-h">Your device ID</div>
         <div class="step-d">The meter you carry. Pre-fills Device ID on every entry.<br>
-          <span style="color:var(--gray)">Examples: <code>atLEAF-01</code> · <code>atLEAF-02</code> · <code>SPAD-502</code></span>
+          <span style="color:var(--gray)">Examples: <code>atLEAF-01</code> &middot; <code>atLEAF-02</code> &middot; <code>SPAD-502</code></span>
         </div>
         <div class="inp-row"><input type="text" class="url-inp" id="myDevice" placeholder="e.g. atLEAF-01"><button class="btn-save" onclick="saveDevice()">Save</button></div>
-        <div class="ok-badge" id="deviceSaved">✅ Saved</div>
+        <div class="ok-badge" id="deviceSaved">&#9989; Saved</div>
       </div>
     </div>
   </div>
   <div class="set-card" style="border-color:#C4B5FD">
-    <div class="set-title" style="color:var(--purple)">✦ Claude API Key</div>
+    <div class="set-title" style="color:var(--purple)">&#10022; Claude API Key</div>
     <div class="step" style="margin-bottom:0">
-      <div class="step-n" style="background:var(--purple)">🤖</div>
+      <div class="step-n" style="background:var(--purple)">&#129302;</div>
       <div class="step-c">
         <div class="step-h">Paste your API key</div>
-        <div class="step-d">Get from <code>console.anthropic.com</code> → API Keys. Stored only on this device.</div>
+        <div class="step-d">Get from <code>console.anthropic.com</code> &rarr; API Keys. Stored only on this device.</div>
         <div class="inp-row"><input type="password" class="url-inp" id="apiKey" placeholder="sk-ant-api03-..."><button class="btn-save" style="background:var(--purple)" onclick="saveApiKey()">Save</button></div>
-        <div class="ok-badge" id="apiKeySaved">✅ API key saved</div>
+        <div class="ok-badge" id="apiKeySaved">&#9989; API key saved</div>
       </div>
     </div>
   </div>
   <div class="set-card">
     <div class="set-title">Connect to Google Sheets</div>
-    <div class="step"><div class="step-n">1</div><div class="step-c"><div class="step-h">Create a Google Sheet</div><div class="step-d"><code>sheets.google.com</code> → New → name it <code>SPAD Calibration DB</code></div></div></div>
+    <div class="step"><div class="step-n">1</div><div class="step-c"><div class="step-h">Create a Google Sheet</div><div class="step-d"><code>sheets.google.com</code> &rarr; New &rarr; name it <code>SPAD Calibration DB</code></div></div></div>
     <div class="step"><div class="step-n">2</div><div class="step-c">
-      <div class="step-h">Open Apps Script & paste code</div>
-      <div class="step-d"><code>Extensions → Apps Script</code> → delete all → paste → Save 💾</div>
+      <div class="step-h">Open Apps Script &amp; paste code</div>
+      <div class="step-d"><code>Extensions &rarr; Apps Script</code> &rarr; delete all &rarr; paste &rarr; Save &#128190;</div>
       <div class="script-box"><pre id="scriptCode">function doPost(e) {
   try {
     var sheet = SpreadsheetApp
@@ -631,11 +644,11 @@ function doGet(e) {
 }</pre></div>
       <button class="btn-copy" onclick="copyScript()">Copy script</button>
     </div></div>
-    <div class="step"><div class="step-n">3</div><div class="step-c"><div class="step-h">Deploy as Web App</div><div class="step-d"><code>Deploy → New deployment → Web app</code><br>Execute as: <code>Me</code> · Who has access: <code>Anyone</code> → Deploy → copy URL</div></div></div>
+    <div class="step"><div class="step-n">3</div><div class="step-c"><div class="step-h">Deploy as Web App</div><div class="step-d"><code>Deploy &rarr; New deployment &rarr; Web app</code><br>Execute as: <code>Me</code> &middot; Who has access: <code>Anyone</code> &rarr; Deploy &rarr; copy URL</div></div></div>
     <div class="step"><div class="step-n">4</div><div class="step-c">
       <div class="step-h">Paste Web App URL</div>
       <div class="inp-row"><input type="text" class="url-inp" id="gasUrl" placeholder="https://script.google.com/macros/s/..."><button class="btn-save" onclick="saveUrl()">Save</button></div>
-      <div class="ok-badge" id="urlSaved">✅ Connected to Google Sheets</div>
+      <div class="ok-badge" id="urlSaved">&#9989; Connected to Google Sheets</div>
     </div></div>
   </div>
   <div class="info-note"><strong>GPS note:</strong> Requires HTTPS. Host on GitHub Pages or Google Sites for full GPS support. Rainfall from Open-Meteo (free, no registration).</div>
@@ -648,11 +661,18 @@ function doGet(e) {
 const SYSTEM_PROMPT = `You are an expert agronomist advisor for Alcedo, a Romanian agricultural inputs distributor. Interpret atLEAF chlorophyll meter readings and provide concise, scientifically grounded diagnostic guidance to field sales representatives.
 
 SCIENTIFIC BASIS:
-- atLEAF CHL BLUE measures at 640nm and 940nm. R²=0.98 correlation with SPAD-502 (Gallinat et al.; Zhu et al. 2011).
-- atLEAF ~40 units ≈ SPAD 43.4 (Piekkielek & Fox 1992 V6 threshold for N response).
-- Leaf N(%) ≈ 0.073 × SPAD − 0.98, R²=0.80 at V6–V12 (Rhezali et al. 2021).
+- atLEAF CHL BLUE measures at 640nm and 940nm. R2=0.98 correlation with SPAD-502 (Gallinat et al.; Zhu et al. 2011).
+- atLEAF ~40 units = SPAD 43.4 (Piekkielek & Fox 1992 V6 threshold for N response).
+- Leaf N(%) = 0.073 x SPAD - 0.98, R2=0.80 at V6-V12 (Rhezali et al. 2021).
 - Sunflower: no validated absolute threshold; V12 most predictive (Tovar Hernandez et al. 2021).
-- SPAD saturates after R1 in maize — interpret late-stage low values as stress/senescence.
+- SPAD saturates after R1 in maize - interpret late-stage low values as stress/senescence.
+- RELATIVE > ABSOLUTE: where a well-fertilised reference strip exists, prefer a Nitrogen Sufficiency Index (reading / reference); NSI <0.95 indicates an N response is likely (N Sufficiency Index review; Sci Rep 2025 SPAD). This neutralises cultivar/weather/stage effects that distort absolute thresholds.
+- Maize late-season (ear leaf): absolute SPAD ~52 or relative SPAD ~0.93 separates N-deficient from sufficient (Fox et al. 2004). Wheat critical SPAD index ~0.94 (Wheat SPAD Index 0.94).
+
+CROP-SPECIFIC NOTES:
+- LEGUMES (soybean, pea): fix atmospheric N2 via rhizobia symbiosis, so cereal SPAD N-deficiency thresholds (e.g. maize V6 SPAD 43.4) and the maize leaf-N regression DO NOT apply. In soybean, chlorophyll-meter readings track nodulation and N-fixation status rather than fertiliser N need (Vollmann et al. 2011); SCMR-leaf-N relations in legumes shift with soil moisture and plant age (Hindawi Lentil 2015). Low greenness in a well-nodulated legume usually points to poor nodulation, inoculation failure, iron-deficiency chlorosis, or Mn/S deficiency - NOT a need for N fertiliser. Mineral N can suppress nodulation; do not recommend N for a nodulating legume. (A relative NSI approach can still work in legumes - e.g. common bean NSI ~95% - but common bean is more N-responsive than soybean/pea: Common Bean NSI 2017.)
+- BARLEY: N-responsive small-grain cereal - interpret like wheat (Wienhold & Krupinsky 1999; Barley NNI 2015).
+- SUGAR BEET: N-responsive; petiole-nitrate / leaf diagnostics are standard (Sexton & Carroll 1999). Flag OVER-supply as well as deficiency - excess N depresses sugar concentration and reduces quality (Wang et al. 2020 Beet).
 
 DIFFERENTIAL DIAGNOSIS:
 1. WATER STRESS: Rainfall <20mm last 14 days blocks N uptake.
@@ -660,10 +680,12 @@ DIFFERENTIAL DIAGNOSIS:
 3. Mg DEFICIENCY: Interveinal chlorosis on older leaves.
 4. DISEASE: Irregular spotting/lesions.
 5. VARIETY BASELINE: Some hybrids naturally lighter green.
+6. NODULATION / RHIZOBIA (legumes only): pale, stunted legume -> check nodule number and internal colour (pink = active); consider inoculation history.
+7. IRON-DEFICIENCY CHLOROSIS (soybean, high-pH/calcareous soils): interveinal yellowing of the YOUNGEST leaves with green veins (Fe is immobile). Confusable with Mn deficiency or soybean cyst nematode (CPN IDC Soybean). CRITICAL: soil nitrate WORSENS IDC and Fe is needed for nodule function - so do NOT apply N to a chlorotic soybean; use a tolerant variety / ortho-ortho Fe-EDDHA instead (UMN IDC Soybean).
 
-RESPOND IN EXACTLY THIS JSON FORMAT — no markdown, no extra text. ALL text values in the JSON must be written in Romanian language:
+RESPOND IN EXACTLY THIS JSON FORMAT - no markdown, no extra text. ALL text values in the JSON must be written in Romanian language:
 {
-  "conclusion": "One sentence: N deficient / borderline / sufficient, and why.",
+  "conclusion": "One sentence: N deficient / borderline / sufficient, and why. For legumes, frame around nodulation/micronutrients rather than N fertiliser.",
   "conclusion_level": "low|borderline|ok",
   "actions": ["Action 1", "Action 2", "Action 3"],
   "stress_context": "One sentence on rainfall/water stress context.",
@@ -677,20 +699,42 @@ Only include papers actually used in your reasoning. Keep actions specific and a
 const PAPERS = {
   "Piekkielek & Fox 1992":       { cite:"Piekkielek & Fox (1992) — V6 threshold 43.4 SPAD, 67-experiment dataset", url:"https://www.researchgate.net/publication/240546191" },
   "Schepers et al. 1992":        { cite:"Schepers et al. (1992) — NSI / reference strip normalization", url:"https://www.ars.usda.gov/ARSUserFiles/30100500/Publications%201999-1990/61%20Comparison%20of%20corn%20leaf%20nitrogen%20concentration%20and%20chlorophyll%20meter%20readings.pdf" },
-  "Rhezali et al. 2021":         { cite:"Rhezali et al. (2021) — Leaf N(%)≈0.073×SPAD−0.98, R²=0.80 at V6–V12", url:"https://www.mdpi.com/2673-4079/2/1/5" },
+  "Rhezali et al. 2021":         { cite:"Rhezali et al. (2021) — Leaf N(%)=0.073xSPAD-0.98, R2=0.80 at V6-V12", url:"https://www.mdpi.com/2673-4079/2/1/5" },
   "Tovar Hernandez et al. 2021": { cite:"Tovar Hernandez et al. (2021) — Sunflower N diagnosis, V12 NDVIr threshold 0.95", url:"https://doi.org/10.1002/agj2.20685" },
   "Xiong et al. 2015":           { cite:"Xiong et al. (2015) — SPAD-N affected by species, light, time of day", url:"https://www.nature.com/articles/srep13389" },
   "Zhu et al. 2011":             { cite:"Zhu, Tremblay & Liang (2011) — atLEAF vs SPAD equivalent performance", url:"https://www.nrcresearchpress.com/doi/abs/10.4141/cjss2011-100" },
-  "Gallinat et al.":             { cite:"Gallinat, Garrison & Primack — atLEAF vs SPAD-502, R²=0.98", url:"https://www.atleaf.com/Download/PrimackLab.pdf" },
+  "Gallinat et al.":             { cite:"Gallinat, Garrison & Primack — atLEAF vs SPAD-502, R2=0.98", url:"https://www.atleaf.com/Download/PrimackLab.pdf" },
   "Lundy et al. 2014":           { cite:"Lundy et al. (2014) — atLEAF in field N management, small grains", url:"https://www.atleaf.com/Download/lundy_13l14annual_report_9l30l14.pdf" },
+  // Legumes (soybean / pea)
+  "Vollmann et al. 2011":        { cite:"Vollmann et al. (2011) — Soybean SPAD reflects nodulation & N-fixation status; leaf greenness ties to seed protein/oil", url:"https://www.sciencedirect.com/science/article/abs/pii/S0168169910002267" },
+  "Hindawi Lentil 2015":         { cite:"Indirect estimation of lentil leaf/plant N by SPAD (2015) — SCMR-leaf-N affected by soil moisture & plant age in a legume", url:"https://www.hindawi.com/journals/ija/2015/748074/" },
+  "UMN IDC Soybean":             { cite:"Univ. of Minnesota Extension — Soybean iron-deficiency chlorosis: interveinal yellowing of youngest leaves on high-pH/calcareous soils; soil nitrate worsens IDC; Fe needed for nodulation", url:"https://extension.umn.edu/crop-specific-needs/managing-iron-deficiency-chlorosis-soybean" },
+  "CPN IDC Soybean":             { cite:"Crop Protection Network — IDC = pale leaves w/ green veins on newest growth (Fe immobile); confusable with Mn deficiency / SCN", url:"https://cropprotectionnetwork.org/encyclopedia/iron-fe-deficiency-chlorosis-idc-of-soybean" },
+  "Common Bean NSI 2017":        { cite:"Common bean NSI ~95%; ~1.1-1.5 kg N/ha per 0.1 NSI point below target (SPAD-502). NB: common bean is more N-responsive than soybean/pea", url:"https://www.scielo.br/j/pat/a/dKcgXcwjkSKZ95rBxRYNvnS" },
+  // Barley
+  "Wienhold & Krupinsky 1999":   { cite:"Wienhold & Krupinsky (1999) — SPAD for N status in barley (small-grain cereal, interpret like wheat)", url:"https://www.sciencedirect.com/science/article/abs/pii/S0140196312001085" },
+  "Barley NNI 2015":             { cite:"Rapid NNI estimation in winter barley via chlorophyll meter (2015) — CM tracks N nutrition index through the season", url:"https://www.sciencedirect.com/science/article/abs/pii/S0378429015300812" },
+  // Sugar beet
+  "Sexton & Carroll 1999":       { cite:"Sexton & Carroll (1999) — SPAD vs petiole-nitrate in sugar beet; excess N lowers sugar concentration", url:"https://agsci.oregonstate.edu/coarec/comparison-spad-chlorophyll-meter-readings-versus-petiole-nitrate-concentration-sugar-beet" },
+  "Wang et al. 2020 Beet":       { cite:"Wang et al. (2020) — Sugar beet N diagnosis; both under- and over-supply of N reduce yield/quality (0-180 kg N/ha trials)", url:"https://link.springer.com/article/10.1007/s42106-020-00109-1" },
+  // Methodology: relative / sufficiency-index approach
+  "N Sufficiency Index review": { cite:"Review (2020) — Dynamic 'sufficiency index' (reading / well-fertilised reference plot); topdress when NSI <0.95. More reliable than fixed thresholds (after Varvel et al.)", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC7070990/" },
+  "Fox et al. 2004":             { cite:"Fox / Piekielek et al. — Maize late-season ear-leaf SPAD: absolute 52.0 (1/4 milk line, 93% accuracy) or relative SPAD 0.93 (92% accuracy)", url:"https://www.researchgate.net/publication/26394894" },
+  "Sci Rep 2025 SPAD":           { cite:"Sci. Reports (2025) — Precision N in maize; highest yield at SPAD sufficiency index 96-100%", url:"https://www.nature.com/articles/s41598-025-05255-y" },
+  "Wheat SPAD Index 0.94":       { cite:"Winter-wheat SPAD index responds exponentially to N (R2=0.95-0.97); critical index 0.94 separates deficiency from sufficiency", url:"https://www.researchgate.net/publication/335704983" },
+  "Arregui et al. 2006":         { cite:"Arregui et al. (2006) — Chlorophyll meter for winter-wheat N decisions, 6-yr / 24-trial validation (Navarra, Spain)", url:"https://www.sciencedirect.com/science/article/abs/pii/S1161030105000705" },
 };
 
 const STAGES = {
-  'Maize':     ['V3','V4','V5','V6','V7','V8','V9','V10','V11','V12','VT','R1','R2','R3','R4'],
-  'Sunflower': ['SF-V6','SF-V8','SF-V12','SF-Bud (star)','SF-Flowering','SF-Seed fill'],
-  'Wheat':     ['T1','T2','T3','Stem extension','Booting','Heading','Flowering','Grain fill'],
-  'Rapeseed':  ['Rosette','Stem extension','Budding','Flowering','Pod fill'],
-  'Other':     ['Vegetative','Reproductive','Other'],
+  'Maize':      ['V3','V4','V5','V6','V7','V8','V9','V10','V11','V12','VT','R1','R2','R3','R4'],
+  'Wheat':      ['T1','T2','T3','Stem extension','Booting','Heading','Flowering','Grain fill'],
+  'Barley':     ['Tillering','Stem extension','Booting','Heading','Flowering','Grain fill'],
+  'Sunflower':  ['SF-V6','SF-V8','SF-V12','SF-Bud (star)','SF-Flowering','SF-Seed fill'],
+  'Rapeseed':   ['Rosette','Stem extension','Budding','Flowering','Pod fill'],
+  'Soybean':    ['VE/VC','V1','V2','V3','V4','V5','V6','R1 (bloom)','R2 (full bloom)','R3 (pod)','R4 (full pod)','R5 (seed)','R6 (full seed)'],
+  'Pea':        ['Seedling','Vegetative (early node)','Vegetative (late node)','Flower bud','Flowering','Pod set','Pod fill'],
+  'Sugar beet': ['2-4 leaf','6-8 leaf','10-12 leaf','Canopy closure','Root bulking'],
+  'Other':      ['Vegetative','Reproductive','Other'],
 };
 
 // ── STORAGE KEY (single source of truth) ──────────────────────────────────
@@ -702,7 +746,7 @@ const STORAGE_KEY = 'spad_v6';
   if (oldData && !localStorage.getItem(STORAGE_KEY)) {
     localStorage.setItem(STORAGE_KEY, oldData);
     localStorage.removeItem('spad_v12');
-    console.log('Migrated records from spad_v12 → ' + STORAGE_KEY);
+    console.log('Migrated records from spad_v12 -> ' + STORAGE_KEY);
   }
 })();
 
@@ -723,7 +767,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   document.getElementById('f_date').value = now.toISOString().split('T')[0];
   document.getElementById('f_time').value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  // Re-fetch rainfall when visit date changes
   document.getElementById('f_date').addEventListener('change', () => {
     if (gpsLat && gpsLon) fetchRainfall(gpsLat, gpsLon);
   });
@@ -742,12 +785,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── GPS ───────────────────────────────────────────────────────────────────
 function getGPS() {
-  setBar('gpsBar','wait','📡','Acquiring GPS...',true);
-  setBar('weatherBar','neutral','🌧️','Rainfall loads after GPS...',false);
-  if (!navigator.geolocation) { setBar('gpsBar','fail','❌','GPS not supported',true); return; }
+  setBar('gpsBar','wait','&#128225;','Acquiring GPS...',true);
+  setBar('weatherBar','neutral','&#127783;&#65039;','Rainfall loads after GPS...',false);
+  if (!navigator.geolocation) { setBar('gpsBar','fail','&#10060;','GPS not supported',true); return; }
   navigator.geolocation.getCurrentPosition(
-    p => { gpsLat=p.coords.latitude.toFixed(5); gpsLon=p.coords.longitude.toFixed(5); setBar('gpsBar','ok','✅',gpsLat+', '+gpsLon,true); fetchRainfall(gpsLat,gpsLon); showMiniMap(); },
-    () => { gpsLat=null; gpsLon=null; setBar('gpsBar','fail','⚠️','GPS failed — needs HTTPS',true); setBar('weatherBar','neutral','—','Rainfall unavailable',false); hideMiniMap(); },
+    p => { gpsLat=p.coords.latitude.toFixed(5); gpsLon=p.coords.longitude.toFixed(5); setBar('gpsBar','ok','&#9989;',gpsLat+', '+gpsLon,true); fetchRainfall(gpsLat,gpsLon); showMiniMap(); },
+    () => { gpsLat=null; gpsLon=null; setBar('gpsBar','fail','&#9888;&#65039;','GPS failed — needs HTTPS',true); setBar('weatherBar','neutral','—','Rainfall unavailable',false); hideMiniMap(); },
     { enableHighAccuracy:true, timeout:10000 }
   );
 }
@@ -759,12 +802,10 @@ function setBar(id, state, icon, text, hasRetry) {
 }
 
 async function fetchRainfall(lat, lon) {
-  setBar('weatherBar','wait','⏳','Fetching 14-day rainfall...',false);
+  setBar('weatherBar','wait','&#9203;','Fetching 14-day rainfall...',false);
   try {
-    // Use visit date (f_date) as end date, not today
     const visitDateVal = document.getElementById('f_date').value;
     const end = visitDateVal ? new Date(visitDateVal) : new Date();
-    // Cap end date at today (can't fetch future data)
     if (end > new Date()) end.setTime(new Date().getTime());
     const start = new Date(end); start.setDate(start.getDate()-14);
     const fmt=d=>d.toISOString().split('T')[0];
@@ -772,19 +813,22 @@ async function fetchRainfall(lat, lon) {
     if (data.daily?.precipitation_sum) {
       rainfallMm = data.daily.precipitation_sum.filter(v=>v!==null).reduce((a,b)=>a+b,0).toFixed(1);
       const mm=parseFloat(rainfallMm);
-      setBar('weatherBar','ok', mm<20?'🔴':mm>60?'💧':'✅', `Rainfall 14d before ${fmt(end)}: ${rainfallMm} mm${mm<20?' — LOW (water stress risk)':mm>60?' — HIGH (N leaching risk)':' — normal'}`, false);
+      setBar('weatherBar','ok', mm<20?'&#128308;':mm>60?'&#128167;':'&#9989;', `Rainfall 14d before ${fmt(end)}: ${rainfallMm} mm${mm<20?' — LOW (water stress risk)':mm>60?' — HIGH (N leaching risk)':' — normal'}`, false);
     } else throw new Error();
-  } catch { rainfallMm=null; setBar('weatherBar','neutral','⚠️','Rainfall data unavailable',false); }
+  } catch { rainfallMm=null; setBar('weatherBar','neutral','&#9888;&#65039;','Rainfall data unavailable',false); }
 }
 
 // ── SPAD CONVERSION FORMULAS (Zhu, Tremblay & Liang 2011) ────────────────
-// SPAD = M * atLEAF + O   per crop
 const SPAD_CONV = {
-  'Maize':     { m: 0.94, o: -7.1,  r2: 0.92, label: 'Corn: 0.94X−7.1' },
-  'Wheat':     { m: 0.93, o: -7.6,  r2: 0.78, label: 'Wheat: 0.93X−7.6' },
-  'Rapeseed':  { m: 1.14, o: -16.6, r2: 0.86, label: 'Canola: 1.14X−16.6' },
-  'Sunflower': null,  // no validated equation — use atLEAF directly
-  'Other':     { m: 0.99, o: -10.1, r2: 0.90, label: 'All species: 0.99X−10.1' },
+  'Maize':      { m: 0.94, o: -7.1,  r2: 0.92, label: 'Corn: 0.94X-7.1' },
+  'Wheat':      { m: 0.93, o: -7.6,  r2: 0.78, label: 'Wheat: 0.93X-7.6' },
+  'Barley':     { m: 0.93, o: -7.6,  r2: 0.78, label: 'Barley (~wheat): 0.93X-7.6' },
+  'Rapeseed':   { m: 1.14, o: -16.6, r2: 0.86, label: 'Canola: 1.14X-16.6' },
+  'Soybean':    { m: 0.99, o: -10.1, r2: 0.90, label: 'Generic cross-crop: 0.99X-10.1' },
+  'Pea':        { m: 0.99, o: -10.1, r2: 0.90, label: 'Generic cross-crop: 0.99X-10.1' },
+  'Sugar beet': { m: 0.99, o: -10.1, r2: 0.90, label: 'Generic cross-crop: 0.99X-10.1' },
+  'Sunflower':  null,
+  'Other':      { m: 0.99, o: -10.1, r2: 0.90, label: 'All species: 0.99X-10.1' },
 };
 
 function getSPADEquiv(atleafVal, crop) {
@@ -799,7 +843,6 @@ function updateStages() {
   const crop=document.getElementById('f_crop').value, sel=document.getElementById('f_stage');
   sel.innerHTML='<option value="">Select...</option>';
   (STAGES[crop]||[]).forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o);});
-  // FAO number: Maize only
   const faoField = document.getElementById('fao_field');
   faoField.style.display = crop==='Maize' ? 'flex' : 'none';
   if (crop!=='Maize') document.getElementById('f_fao').value='';
@@ -824,38 +867,37 @@ function checkVal() {
     return;
   }
 
-  // Auto-fill SPAD equivalent (only if not manually edited)
   const conv = getSPADEquiv(val, crop);
   if (!spadManuallyEdited) {
     if (conv) {
       spadInp.value = conv.spad;
       spadInp.style.color = conv.spad < 43.4 ? 'var(--amber)' : 'var(--teal)';
-      convFormula.textContent = conv.label + ' (R²=' + conv.r2 + ', Zhu et al. 2011)';
+      convFormula.textContent = conv.label + ' (R2=' + conv.r2 + ', Zhu et al. 2011)';
     } else {
-      // Sunflower — no equation
       spadInp.value = '';
       spadInp.style.color = 'var(--gray)';
       convFormula.textContent = 'No validated equation for sunflower';
     }
   }
 
-  // Threshold warnings
-  // Maize V6: atLEAF 53.7 ≈ SPAD 43.4 (Piekkielek & Fox 1992, via Zhu et al. 2011)
   const isLowMaizeV6 = crop === 'Maize' && stage === 'V6' && val < 53.7;
   const isVeryLow    = val < 40;
 
   if (isLowMaizeV6) {
     inp.className  = 'atleaf-inp low';
     warn.className = 'spad-warn low';
-    warn.innerHTML = '⚠️  Below V6 diagnostic threshold (atLEAF 53.7 ≈ SPAD 43.4) — N response likely.<br>Rule out water stress & S deficiency first.';
+    warn.innerHTML = '&#9888;&#65039;  Below V6 diagnostic threshold (atLEAF 53.7 = SPAD 43.4) — N response likely.<br>Rule out water stress &amp; S deficiency first.';
   } else if (isVeryLow) {
     inp.className  = 'atleaf-inp low';
     warn.className = 'spad-warn low';
-    warn.innerHTML = '⚠️  Very low reading — investigate N, S, water stress, and disease.';
+    const isLegume = crop === 'Soybean' || crop === 'Pea';
+    warn.innerHTML = isLegume
+      ? '&#9888;&#65039;  Low reading — in legumes check nodulation, Fe deficiency (young leaves) &amp; S before assuming N. Legumes fix their own N.'
+      : '&#9888;&#65039;  Very low reading — investigate N, S, water stress, and disease.';
   } else {
     inp.className  = 'atleaf-inp';
     warn.className = 'spad-warn ok';
-    warn.innerHTML = '✓  Reading recorded';
+    warn.innerHTML = '&#10003;  Reading recorded';
   }
 }
 
@@ -909,11 +951,8 @@ Visual Observations: ${document.getElementById('f_visual').value||'none'}`;
     else {
       const raw=data.content[0].text; lastAIResult=raw;
       try {
-        // Strip markdown code blocks and extract JSON robustly
         let jsonStr = raw;
-        // Remove ```json ... ``` or ``` ... ``` wrappers
         jsonStr = jsonStr.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-        // If still not starting with {, find the first { and last }
         const firstBrace = jsonStr.indexOf('{');
         const lastBrace  = jsonStr.lastIndexOf('}');
         if (firstBrace !== -1 && lastBrace !== -1) {
@@ -922,16 +961,15 @@ Visual Observations: ${document.getElementById('f_visual').value||'none'}`;
         lastAIParsed = JSON.parse(jsonStr);
         renderAI(lastAIParsed, cont);
         document.getElementById('aiTimestamp').textContent = new Date().toLocaleTimeString();
-        toast('Interpretation complete ✓','s');
+        toast('Interpretation complete &#10003;','s');
       } catch(parseErr) {
-        // Fallback: show raw text
         cont.innerHTML = `<div style="font-size:13px;white-space:pre-wrap;line-height:1.7;color:var(--text)">${raw}</div>`;
         lastAIParsed = null;
       }
     }
   } catch(err) { cont.innerHTML=`<span style="color:var(--red)">Connection error: ${err.message}</span>`; }
 
-  btn.disabled=false; btn.innerHTML='✦ Interpret with AI';
+  btn.disabled=false; btn.innerHTML='&#10022; Interpret with AI';
 }
 
 // ── RENDER AI (reusable) ──────────────────────────────────────────────────
@@ -941,7 +979,7 @@ function renderAI(p, container) {
   const paperLinks = (p.papers||[]).map(key=>{
     const ref=PAPERS[key];
     if(!ref) return `<div class="ref-item"><span>${key}</span></div>`;
-    return `<div class="ref-item"><a href="${ref.url}" target="_blank">[↗]</a><span>${ref.cite}</span></div>`;
+    return `<div class="ref-item"><a href="${ref.url}" target="_blank">[&#8599;]</a><span>${ref.cite}</span></div>`;
   }).join('');
 
   container.innerHTML = `
@@ -954,7 +992,7 @@ function renderAI(p, container) {
       ${(p.actions||[]).map(a=>`<div class="ai-action-item">${a}</div>`).join('')}
     </div>
     <div class="ai-detail">
-      <div class="ai-detail-label">RAINFALL & STRESS CONTEXT</div>
+      <div class="ai-detail-label">RAINFALL &amp; STRESS CONTEXT</div>
       <div class="ai-detail-text">${p.stress_context}</div>
     </div>
     <div class="ai-detail">
@@ -973,9 +1011,7 @@ function renderAI(p, container) {
 function showConfirm() {
   const req={f_farmer:'Farmer Name',f_date:'Date',f_time:'Time',f_device:'Device ID',f_meas_id:'Measurement ID',f_crop:'Crop',f_stage:'Growth Stage',f_variety:'Variety',f_leaf_pos:'Leaf Position'};
   for (const [id,label] of Object.entries(req)) { if(!document.getElementById(id).value.trim()){toast(label+' is required','e');return;} }
-  // FAO required for Maize
   if (document.getElementById('f_crop').value==='Maize' && !document.getElementById('f_fao').value) { toast('FAO Number is required for Maize','e'); return; }
-  // At least one of atLEAF or SPAD required
   const hasAtleaf = document.getElementById('f_atleaf').value.trim() !== '';
   const hasSpad   = document.getElementById('f_spad_equiv').value.trim() !== '';
   if (!hasAtleaf && !hasSpad) { toast('Enter atLEAF value or SPAD value (at least one required)','e'); return; }
@@ -989,7 +1025,7 @@ function showConfirm() {
     ['SPAD value',  document.getElementById('f_spad_equiv').value || '—'],
     ['N Applied', document.getElementById('f_n_rate').value ? document.getElementById('f_n_rate').value+' kg N/ha' : 'not specified'],
     ['Rainfall',  rainfallMm?rainfallMm+' mm (last 14d)':'not available'],
-    ['AI done',   lastAIParsed?'✓ Yes':'— Not yet'],
+    ['AI done',   lastAIParsed?'&#10003; Yes':'— Not yet'],
   ].map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('');
   document.getElementById('confirmModal').classList.add('show');
 }
@@ -1016,9 +1052,9 @@ async function doSubmit() {
   records.unshift(r); localStorage.setItem(STORAGE_KEY,JSON.stringify(records));
   const btn=document.getElementById('btnSubmit'); btn.disabled=true; btn.textContent='Saving...';
   if (gasUrl) {
-    try { await fetch(gasUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)}); r.synced=true; localStorage.setItem(STORAGE_KEY,JSON.stringify(records)); toast('Saved & synced to Sheets ✓','s'); }
+    try { await fetch(gasUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(r)}); r.synced=true; localStorage.setItem(STORAGE_KEY,JSON.stringify(records)); toast('Saved & synced to Sheets &#10003;','s'); }
     catch { toast('Saved locally (offline)','e'); }
-  } else { toast('Saved locally ✓','s'); }
+  } else { toast('Saved locally &#10003;','s'); }
   btn.disabled=false; btn.textContent='Save Record';
   resetForm();
 }
@@ -1037,7 +1073,6 @@ function resetForm() {
   document.getElementById('f_spad_equiv').style.color='var(--forest)';
   document.getElementById('spadConvFormula').textContent='';
   spadManuallyEdited=false;
-  // Re-generate measurement ID for next entry; keep device ID
   if (myDevice) document.getElementById('f_device').value = myDevice;
   genMeasId();
   document.getElementById('spadWarn').className='spad-warn';
@@ -1050,7 +1085,6 @@ function resetForm() {
 function openDetail(idx) {
   const r = records[idx];
   if (!r) return;
-  // Use SPAD equiv if available, else atLEAF to determine low
   const spadVal   = parseFloat(r.spad_equiv);
   const atleafVal = parseFloat(r.atleaf_avg);
   const low = (!isNaN(spadVal) && spadVal < 43.4) ||
@@ -1059,15 +1093,13 @@ function openDetail(idx) {
   const displayLbl  = !isNaN(spadVal) ? 'SPAD' : 'atLEAF';
 
   document.getElementById('d_farmer').textContent = r.farmer;
-  document.getElementById('d_meta').textContent   = `${r.date} · ${r.sales_rep} · ${r.synced?'☁️ synced':'💾 local'}`;
+  document.getElementById('d_meta').textContent   = `${r.date} · ${r.sales_rep} · ${r.synced?'\u2601\ufe0f synced':'\ud83d\udcbe local'}`;
   const badge = document.getElementById('d_atleaf');
   badge.textContent = displayMain;
   badge.className   = 'detail-atleaf-badge' + (low?' low':'');
-  // Update label under badge
   const badgeLabel = badge.nextElementSibling;
   if (badgeLabel) badgeLabel.textContent = displayLbl + ' value';
 
-  // Build body
   const grid = [
     ['Crop',        r.crop],
     ['Stage',       r.stage],
@@ -1089,14 +1121,13 @@ function openDetail(idx) {
       <div class="detail-visual-text">${r.visual}</div>
     </div>` : '';
 
-  // Map + Google Maps link
   const mapHtml = r.lat && r.lon ? `
     <div style="margin-bottom:12px;">
       <div class="detail-visual-label" style="margin-bottom:6px;">LOCATION</div>
       <div class="detail-map" id="detailMapContainer"></div>
       <div style="text-align:center;margin-top:6px;">
         <a href="https://maps.google.com/?q=${r.lat},${r.lon}" target="_blank" class="btn-gmaps">
-          📍 Open in Google Maps
+          &#128205; Open in Google Maps
         </a>
       </div>
     </div>` : '';
@@ -1113,9 +1144,9 @@ function openDetail(idx) {
       })();
       const tmp = document.createElement('div');
       renderAI(p, tmp);
-      aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">✦ AI INTERPRETATION</div>${tmp.innerHTML}</div>`;
+      aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">&#10022; AI INTERPRETATION</div>${tmp.innerHTML}</div>`;
     } catch {
-      aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">✦ AI INTERPRETATION</div><div style="font-size:12px;line-height:1.7;white-space:pre-wrap">${r.ai_interpretation}</div></div>`;
+      aiHtml = `<div class="detail-ai-box"><div class="detail-ai-header">&#10022; AI INTERPRETATION</div><div style="font-size:12px;line-height:1.7;white-space:pre-wrap">${r.ai_interpretation}</div></div>`;
     }
   } else {
     aiHtml = `<div class="detail-no-ai">No AI interpretation recorded for this visit.</div>`;
@@ -1131,7 +1162,6 @@ function openDetail(idx) {
   document.getElementById('detailModal').classList.add('show');
   document.getElementById('detailSheet').scrollTop = 0;
 
-  // Render map after modal is shown
   if (r.lat && r.lon) {
     setTimeout(() => renderDetailMap('detailMapContainer', r.lat, r.lon, r.farmer), 150);
   }
@@ -1150,7 +1180,7 @@ function renderRecords() {
   document.getElementById('stats').innerHTML=`
     <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">TOTAL</div></div>
     <div class="stat"><div class="stat-n a">${flagged}</div><div class="stat-l">FLAGGED</div></div>
-    <div class="stat"><div class="stat-n">${synced}</div><div class="stat-l">SYNCED ☁️</div></div>`;
+    <div class="stat"><div class="stat-n">${synced}</div><div class="stat-l">SYNCED &#9729;&#65039;</div></div>`;
   const list=document.getElementById('recList');
   if(!records.length){list.innerHTML='<div class="empty">No records yet.</div>';return;}
   list.innerHTML=records.map((r,i)=>{
@@ -1167,27 +1197,27 @@ function renderRecords() {
         return JSON.parse(s);
       })().conclusion||''; } catch{}
     const gmapsBtn = r.lat && r.lon
-      ? `<a href="https://maps.google.com/?q=${r.lat},${r.lon}" target="_blank" class="btn-gmaps-sm" onclick="event.stopPropagation()">📍</a>`
+      ? `<a href="https://maps.google.com/?q=${r.lat},${r.lon}" target="_blank" class="btn-gmaps-sm" onclick="event.stopPropagation()">&#128205;</a>`
       : '';
     return `<div class="card ${low?'flag':''}" onclick="openDetail(${i})">
       <div class="card-top">
-        <div><div class="card-name">${r.farmer}</div><div class="card-meta">${r.date} · ${r.sales_rep} · ${r.synced?'☁️':'💾'}</div></div>
+        <div><div class="card-name">${r.farmer}</div><div class="card-meta">${r.date} · ${r.sales_rep} · ${r.synced?'\u2601\ufe0f':'\ud83d\udcbe'}</div></div>
         <div style="text-align:right"><div class="spad-big ${low?'low':''}">${displayVal}</div><div class="spad-lbl2">${displayLbl}</div></div>
       </div>
       <div class="chips">
         <span class="chip">${r.crop}</span><span class="chip">${r.stage}</span>
         <span class="chip">${r.variety}</span>
-        ${r.rainfall?`<span class="chip">🌧 ${r.rainfall}mm</span>`:''}
-        ${r.ai_interpretation?'<span class="chip ai">✦ AI</span>':''}
+        ${r.rainfall?`<span class="chip">&#127783; ${r.rainfall}mm</span>`:''}
+        ${r.ai_interpretation?'<span class="chip ai">&#10022; AI</span>':''}
       </div>
       ${conclusion?`<div class="ai-snippet">${conclusion}</div>`:''}
       <div class="card-bot">
         <div style="font-size:11px;color:var(--gray);display:flex;align-items:center;gap:8px;">
           ${r.device_id} · #${r.meas_id} ${gmapsBtn}
         </div>
-        <div class="flag-pill ${low?'low':'ok'}">${low?'⚠ BELOW THRESHOLD':'✓ OK'}</div>
+        <div class="flag-pill ${low?'low':'ok'}">${low?'\u26a0 BELOW THRESHOLD':'\u2713 OK'}</div>
       </div>
-      <div class="tap-hint">tap to view full diagnosis →</div>
+      <div class="tap-hint">tap to view full diagnosis &rarr;</div>
     </div>`;
   }).join('');
 }
@@ -1198,7 +1228,7 @@ function exportCSV() {
   const rows=records.map(r=>[r.id,r.sales_rep,`"${r.farmer}"`,r.date,r.time,r.lat,r.lon,r.rainfall,r.device_id,r.meas_id,r.crop,`"${r.variety}"`,r.fao,r.stage,r.leaf_pos,r.atleaf_avg,r.spad_equiv,r.n_rate,r.n_date,r.soil,r.prev_crop,`"${r.visual}"`,`"${(r.ai_interpretation||'').replace(/"/g,"'")}"`,r.synced?'yes':'no']);
   const csv=[H,...rows].map(r=>r.join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='SPAD_'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
-  toast('CSV exported ✓','s');
+  toast('CSV exported &#10003;','s');
 }
 
 // ── MAP FUNCTIONS ─────────────────────────────────────────────────────────
@@ -1210,11 +1240,9 @@ function showMiniMap() {
   mapDiv.classList.remove('hidden');
   actionsDiv.style.display = 'block';
 
-  // Update Google Maps link
   document.getElementById('gmapsLinkEntry').href =
     `https://maps.google.com/?q=${lat},${lon}`;
 
-  // Init or update map
   if (!miniMapInstance) {
     miniMapInstance = L.map('miniMap', {
       zoomControl: false, attributionControl: false,
@@ -1233,7 +1261,6 @@ function showMiniMap() {
     fillColor: '#97BC62', fillOpacity: 0.8
   }).addTo(miniMapInstance);
 
-  // Fix sizing issue after tab display
   setTimeout(() => miniMapInstance.invalidateSize(), 100);
 }
 
@@ -1254,7 +1281,6 @@ function renderRecordsMap() {
     mapDiv.innerHTML = '';
   }
 
-  // Init or recreate
   if (recordsMapInstance) {
     recordsMapInstance.remove();
     recordsMapInstance = null;
@@ -1265,7 +1291,6 @@ function renderRecordsMap() {
     attribution: '© OpenStreetMap'
   }).addTo(recordsMapInstance);
 
-  // Create cluster group with custom icon showing count
   const clusterGroup = L.markerClusterGroup({
     showCoverageOnHover: false,
     spiderfyOnMaxZoom: true,
@@ -1273,7 +1298,6 @@ function renderRecordsMap() {
     iconCreateFunction: cluster => {
       const children = cluster.getAllChildMarkers();
       const count = children.length;
-      // If any child is low (flagged), colour the cluster amber
       const anyLow = children.some(m => m.options._isLow);
       const bg = anyLow ? '#D4841A' : '#1A6B5C';
       return L.divIcon({
@@ -1319,7 +1343,7 @@ function renderRecordsMap() {
       ${displayVal}<br>
       <span style="color:#6B7280;font-size:11px">${r.date}</span><br>
       <a href="https://maps.google.com/?q=${lat},${lon}" target="_blank"
-        class="btn-gmaps-sm" style="margin-top:6px;">📍 Google Maps</a>
+        class="btn-gmaps-sm" style="margin-top:6px;">&#128205; Google Maps</a>
       <button onclick="openDetail(${origIdx})"
         style="margin-top:4px;margin-left:4px;padding:4px 10px;font-size:11px;border-radius:6px;background:#2C5F2D;color:#fff;border:none;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">View details</button>
     `);
@@ -1329,7 +1353,6 @@ function renderRecordsMap() {
 
   recordsMapInstance.addLayer(clusterGroup);
 
-  // Fit bounds to show all markers
   if (markers.length === 1) {
     recordsMapInstance.setView(markers[0].getLatLng(), 13);
   } else if (markers.length > 1) {
@@ -1346,7 +1369,6 @@ function renderDetailMap(containerId, lat, lon, farmer) {
     div.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray);font-size:12px;">No GPS recorded</div>';
     return;
   }
-  // Clear any previous instance
   if (detailMapInstance) {
     detailMapInstance.remove();
     detailMapInstance = null;
@@ -1376,7 +1398,7 @@ function switchTab(tab,btn){
 }
 
 // ── SETUP ─────────────────────────────────────────────────────────────────
-function saveName(){ const n=document.getElementById('userName').value.trim(); if(!n){toast('Enter your name','e');return;} userName=n; localStorage.setItem('spad_user',n); document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=n; toast('Name saved ✓','s'); }
+function saveName(){ const n=document.getElementById('userName').value.trim(); if(!n){toast('Enter your name','e');return;} userName=n; localStorage.setItem('spad_user',n); document.getElementById('nameSaved').style.display='flex'; document.getElementById('headerUser').textContent=n; toast('Name saved &#10003;','s'); }
 
 function saveDevice(){
   const d=document.getElementById('myDevice').value.trim();
@@ -1385,11 +1407,10 @@ function saveDevice(){
   localStorage.setItem('spad_my_device',d);
   document.getElementById('deviceSaved').style.display='flex';
   document.getElementById('f_device').value=d;
-  toast('Device saved ✓','s');
+  toast('Device saved &#10003;','s');
 }
 
 function genMeasId(){
-  // Format: [DeviceID]-[YYYYMMDD]-[counter padded to 3]
   const dev  = (myDevice || document.getElementById('f_device').value || 'DEV').replace(/[^a-zA-Z0-9\-]/g,'');
   const date = (document.getElementById('f_date').value || new Date().toISOString().split('T')[0]).replace(/-/g,'');
   measCounter++;
@@ -1398,11 +1419,11 @@ function genMeasId(){
   document.getElementById('f_meas_id').value = id;
   toast('Measurement ID generated','s');
 }
-function saveApiKey(){ const k=document.getElementById('apiKey').value.trim(); if(!k.startsWith('sk-ant-')){toast('Invalid API key format','e');return;} apiKey=k; localStorage.setItem('spad_api_key',k); document.getElementById('apiKeySaved').style.display='flex'; document.getElementById('apiWarn').classList.remove('show'); toast('API key saved ✓','s'); }
-function saveUrl(){ const u=document.getElementById('gasUrl').value.trim(); if(!u.startsWith('https://script.google.com')){toast('Paste a valid Apps Script URL','e');return;} gasUrl=u; localStorage.setItem('spad_gas_url',u); document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); toast('Connected ✓','s'); }
-function copyScript(){ navigator.clipboard.writeText(document.getElementById('scriptCode').textContent).then(()=>toast('Script copied ✓','s')).catch(()=>toast('Select and copy manually','e')); }
+function saveApiKey(){ const k=document.getElementById('apiKey').value.trim(); if(!k.startsWith('sk-ant-')){toast('Invalid API key format','e');return;} apiKey=k; localStorage.setItem('spad_api_key',k); document.getElementById('apiKeySaved').style.display='flex'; document.getElementById('apiWarn').classList.remove('show'); toast('API key saved &#10003;','s'); }
+function saveUrl(){ const u=document.getElementById('gasUrl').value.trim(); if(!u.startsWith('https://script.google.com')){toast('Paste a valid Apps Script URL','e');return;} gasUrl=u; localStorage.setItem('spad_gas_url',u); document.getElementById('urlSaved').style.display='flex'; setSyncPill(true); toast('Connected &#10003;','s'); }
+function copyScript(){ navigator.clipboard.writeText(document.getElementById('scriptCode').textContent).then(()=>toast('Script copied &#10003;','s')).catch(()=>toast('Select and copy manually','e')); }
 function setSyncPill(on){ document.getElementById('syncLabel').textContent=on?'sheets':'local'; document.getElementById('syncDot').className='sync-dot'+(on?' on':''); }
-function toast(msg,type){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast '+type+' show'; setTimeout(()=>t.className='toast',2800); }
+function toast(msg,type){ const t=document.getElementById('toast'); t.innerHTML=msg; t.className='toast '+type+' show'; setTimeout(()=>t.className='toast',2800); }
 </script>
 </body>
 </html>
